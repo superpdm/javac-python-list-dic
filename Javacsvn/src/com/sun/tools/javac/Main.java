@@ -46,7 +46,8 @@ public class Main {
     /** Unsupported command line interface.
      * @param args   The command line parameters.
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args_old) throws Exception {
+    	String args[]={"C:\\kk.java"};
       if (args.length > 0 && args[0].equals("-Xjdb")) {
         String[] newargs = new String[args.length + 2];
         Class<?> c = Class.forName("com.sun.tools.example.debug.tty.TTY");
