@@ -79,6 +79,7 @@ public interface TreeVisitor<R,P> {
     R visitIf(IfTree node, P p);
     R visitImport(ImportTree node, P p);
     R visitArrayAccess(ArrayAccessTree node, P p);
+    /*add*/R visitListAccess(ListAccessTree node, P p);
     R visitLabeledStatement(LabeledStatementTree node, P p);
     R visitLiteral(LiteralTree node, P p);
     R visitMethod(MethodTree node, P p);

@@ -982,6 +982,22 @@ public class JavacParser implements Parser {
             loop: while (true) {
                 pos = S.pos();
                 switch (S.token()) {
+                case LBRACE:
+                	S.nextToken();
+                	if(S.token()==RBRACE){
+                		S.nextToken();
+                		t=bracketsOpt(t);
+                		t=toP(F.at(pos).TypeArray(t));
+                		t=bracketsSuffix(t);
+                	}else{
+                		if((mode&EXPR)!=0){
+                			mode=EXPR;
+                			JCExpression t1=term();
+                			t=to(F.at(pos).IndexedL(t, t1));
+                		}
+                		accept(RBRACE);
+                	}
+                	break loop;
                 case LBRACKET:
                     S.nextToken();
                     if (S.token() == RBRACKET) {

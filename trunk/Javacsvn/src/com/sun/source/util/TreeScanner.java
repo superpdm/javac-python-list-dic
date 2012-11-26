@@ -328,6 +328,13 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
         r = scanAndReduce(node.getIndex(), p, r);
         return r;
     }
+/*add*/
+    public R visitListAccess(ListAccessTree node, P p) {
+        R r = scan(node.getExpression(), p);
+        r = scanAndReduce(node.getIndex(), p, r);
+        return r;
+    }
+    
 
     public R visitMemberSelect(MemberSelectTree node, P p) {
         return scan(node.getExpression(), p);

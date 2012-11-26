@@ -2127,7 +2127,19 @@ public class Attr extends JCTree.Visitor {
         if ((pkind & VAR) == 0) owntype = capture(owntype);
         result = check(tree, owntype, VAR, pkind, pt);
     }
-
+/*add*/
+    public void visitIndexedL(JCListAccess tree) {
+        Type owntype = types.createErrorType(tree.type);
+        Type atype = attribExpr(tree.indexed, env);
+        attribExpr(tree.index, env, syms.intType);
+        if (types.isArray(atype))
+            owntype = types.elemtype(atype);
+        else if (atype.tag != ERROR)
+            log.error(tree.pos(), "array.req.but.found", atype);
+        if ((pkind & VAR) == 0) owntype = capture(owntype);
+        result = check(tree, owntype, VAR, pkind, pt);
+    }
+    
     public void visitIdent(JCIdent tree) {
         Symbol sym;
         boolean varArgs = false;

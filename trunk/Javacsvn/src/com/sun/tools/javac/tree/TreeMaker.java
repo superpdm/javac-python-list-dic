@@ -392,7 +392,13 @@ public class TreeMaker implements JCTree.Factory {
         tree.pos = pos;
         return tree;
     }
-
+/*add*/
+    public JCListAccess IndexedL(JCExpression indexed, JCExpression index) {
+        JCListAccess tree = new JCListAccess(indexed, index);
+        tree.pos = pos;
+        return tree;
+    }
+    
     public JCArrayAccess Indexed(JCExpression indexed, JCExpression index) {
         JCArrayAccess tree = new JCArrayAccess(indexed, index);
         tree.pos = pos;
