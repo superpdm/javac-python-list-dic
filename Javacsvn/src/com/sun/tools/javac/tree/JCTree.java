@@ -1633,6 +1633,32 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     }
 
     /**
+     * A List Selection
+     */
+    public static class JCListAccess extends JCExpression implements ListAccessTree {
+        public JCExpression indexed;
+        public JCExpression index;
+        protected JCListAccess(JCExpression indexed, JCExpression index) {
+            this.indexed = indexed;
+            this.index = index;
+        }
+        @Override
+        public void accept(Visitor v) { v.visitIndexedL(this); }
+
+        public Kind getKind() { return Kind.ARRAY_ACCESS; }
+        public JCExpression getExpression() { return indexed; }
+        public JCExpression getIndex() { return index; }
+        @Override
+        public <R,D> R accept(TreeVisitor<R,D> v, D d) {
+            return v.visitListAccess(this, d);
+        }
+        @Override
+        public int getTag() {
+            return INDEXED;
+        }
+    }
+    
+    /**
      * An array selection
      */
     public static class JCArrayAccess extends JCExpression implements ArrayAccessTree {
@@ -2221,6 +2247,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void visitTypeCast(JCTypeCast that)           { visitTree(that); }
         public void visitTypeTest(JCInstanceOf that)         { visitTree(that); }
         public void visitIndexed(JCArrayAccess that)         { visitTree(that); }
+        /*add*/public void visitIndexedL(JCListAccess that)         { visitTree(that); }
         public void visitSelect(JCFieldAccess that)          { visitTree(that); }
         public void visitIdent(JCIdent that)                 { visitTree(that); }
         public void visitLiteral(JCLiteral that)             { visitTree(that); }

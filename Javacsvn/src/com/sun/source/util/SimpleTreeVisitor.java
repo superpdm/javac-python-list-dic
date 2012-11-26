@@ -203,7 +203,11 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
     public R visitArrayAccess(ArrayAccessTree node, P p) {
         return defaultAction(node, p);
     }
-
+/*add*/
+    public R visitListAccess(ListAccessTree node, P p) {
+        return defaultAction(node, p);
+    }
+    
     public R visitMemberSelect(MemberSelectTree node, P p) {
         return defaultAction(node, p);
     }

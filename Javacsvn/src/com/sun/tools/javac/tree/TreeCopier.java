@@ -215,7 +215,14 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         JCExpression index = copy(t.index, p);
         return M.at(t.pos).Indexed(indexed, index);
     }
-
+/*add*/
+    public JCTree visitListAccess(ListAccessTree node, P p) {
+        JCListAccess t = (JCListAccess) node;
+        JCExpression indexed = copy(t.indexed, p);
+        JCExpression index = copy(t.index, p);
+        return M.at(t.pos).Indexed(indexed, index);
+    }
+    
     public JCTree visitLabeledStatement(LabeledStatementTree node, P p) {
         JCLabeledStatement t = (JCLabeledStatement) node;
         JCStatement body = copy(t.body, p);
