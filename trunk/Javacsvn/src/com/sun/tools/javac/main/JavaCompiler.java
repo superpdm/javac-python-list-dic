@@ -45,6 +45,7 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.DiagnosticListener;
 
+import com.sun.source.tree.Tree;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 
@@ -1186,6 +1187,8 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 attr.postAttr(env);
             }
             compileStates.put(env, CompileState.ATTR);
+            env.toplevel.accept(new ListTreeTranslator());
+            
         }
         finally {
             log.useSource(prev);

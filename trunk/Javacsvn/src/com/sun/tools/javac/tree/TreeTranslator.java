@@ -334,7 +334,13 @@ public class TreeTranslator extends JCTree.Visitor {
         tree.index = translate(tree.index);
         result = tree;
     }
-
+/*add*/
+    public void visitIndexedL(JCListAccess tree) {
+        tree.indexed = translate(tree.indexed);
+        tree.index = translate(tree.index);
+        result = tree;
+    }
+    
     public void visitSelect(JCFieldAccess tree) {
         tree.selected = translate(tree.selected);
         result = tree;
