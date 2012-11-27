@@ -288,6 +288,13 @@ public class TreeTranslator extends JCTree.Visitor {
         tree.elems = translate(tree.elems);
         result = tree;
     }
+    public void visitNewList(JCNewList tree) {
+        tree.elemtype = translate(tree.elemtype);
+        tree.dims = translate(tree.dims);
+        tree.elems = translate(tree.elems);
+        result = tree;
+        
+    }
 
     public void visitParens(JCParens tree) {
         tree.expr = translate(tree.expr);

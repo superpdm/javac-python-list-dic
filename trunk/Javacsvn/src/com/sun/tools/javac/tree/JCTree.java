@@ -1429,6 +1429,40 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
     }
 
+    public static class JCNewList extends JCExpression implements NewListTree {
+        public JCExpression elemtype;
+        public List<JCExpression> dims;
+        public List<JCExpression> elems;
+        protected JCNewList(JCExpression elemtype,
+                           List<JCExpression> dims,
+                           List<JCExpression> elems)
+        {
+            this.elemtype = elemtype;
+            this.dims = dims;
+            this.elems = elems;
+        }
+        @Override
+        public void accept(Visitor v) { v.visitNewList(this); }
+
+        public Kind getKind() { return Kind.NEW_ARRAY; }
+        public JCExpression getType() { return elemtype; }
+        public List<JCExpression> getDimensions() {
+            return dims;
+        }
+        public List<JCExpression> getInitializers() {
+            return elems;
+        }
+        @Override
+        public <R,D> R accept(TreeVisitor<R,D> v, D d) {
+            return v.visitNewList(this, d);
+        }
+        @Override
+        public int getTag() {
+            return NEWARRAY;
+        }
+    }
+
+    
     /**
      * A parenthesized subexpression ( ... )
      */
@@ -1632,6 +1666,10 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
     }
 
+    /*
+     * A listInitializer
+     * */
+    
     /**
      * A List Selection
      */
@@ -2239,6 +2277,8 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void visitApply(JCMethodInvocation that)      { visitTree(that); }
         public void visitNewClass(JCNewClass that)           { visitTree(that); }
         public void visitNewArray(JCNewArray that)           { visitTree(that); }
+        /*add*/
+        public void visitNewList(JCNewList that)           { visitTree(that); }
         public void visitParens(JCParens that)               { visitTree(that); }
         public void visitAssign(JCAssign that)               { visitTree(that); }
         public void visitAssignop(JCAssignOp that)           { visitTree(that); }
@@ -2248,6 +2288,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void visitTypeTest(JCInstanceOf that)         { visitTree(that); }
         public void visitIndexed(JCArrayAccess that)         { visitTree(that); }
         /*add*/public void visitIndexedL(JCListAccess that)         { visitTree(that); }
+        /*add*/
         public void visitSelect(JCFieldAccess that)          { visitTree(that); }
         public void visitIdent(JCIdent that)                 { visitTree(that); }
         public void visitLiteral(JCLiteral that)             { visitTree(that); }

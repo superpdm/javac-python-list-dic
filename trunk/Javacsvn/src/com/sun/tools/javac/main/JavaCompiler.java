@@ -594,6 +594,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             }
             Parser parser = parserFactory.newParser(content, keepComments(), genEndPos, lineDebugInfo);
             tree = parser.parseCompilationUnit();
+            tree.toString();
             if (verbose) {
                 log.printVerbose("parsing.done", Long.toString(elapsed(msec)));
             }

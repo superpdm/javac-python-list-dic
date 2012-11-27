@@ -1961,7 +1961,38 @@ public class Attr extends JCTree.Visitor {
             log.error(tree.pos(), "generic.array.creation");
         result = check(tree, owntype, VAL, pkind, pt);
     }
-
+    public void visitNewList(JCNewList tree) {
+        Type owntype = types.createErrorType(tree.type);
+        Type elemtype;
+        if (tree.elemtype != null) {
+            elemtype = attribType(tree.elemtype, env);
+            chk.validate(tree.elemtype, env);
+            owntype = elemtype;
+            for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
+                attribExpr(l.head, env, syms.intType);
+                owntype = new ArrayType(owntype, syms.arrayClass);
+            }
+        } else {
+            // we are seeing an untyped aggregate { ... }
+            // this is allowed only if the prototype is an array
+            if (pt.tag == CLASS) {
+                elemtype = owntype;
+            } else {
+                if (pt.tag != ERROR) {
+                    log.error(tree.pos(), "illegal.initializer.for.type",
+                              pt);
+                }
+                elemtype = types.createErrorType(pt);
+            }
+        }
+        if (tree.elems != null) {
+            attribExprs(tree.elems, env, elemtype);
+            //owntype = new ArrayType(elemtype, syms.arrayClass);
+        }
+        if (!types.isReifiable(elemtype))
+            log.error(tree.pos(), "generic.array.creation");
+        result = check(tree, owntype, VAL, pkind, pt);
+    }
     public void visitParens(JCParens tree) {
         Type owntype = attribTree(tree.expr, env, pkind, pt);
         result = check(tree, owntype, pkind, pkind, pt);

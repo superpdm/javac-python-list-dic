@@ -171,7 +171,11 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
     public R visitNewArray(NewArrayTree node, P p) {
         return defaultAction(node, p);
     }
-
+/*add*/
+    public R visitNewList(NewListTree node, P p) {
+        return defaultAction(node, p);
+    }
+    
     public R visitParenthesized(ParenthesizedTree node, P p) {
         return defaultAction(node, p);
     }
