@@ -1520,9 +1520,39 @@ public class JavacParser implements Parser {
     /** VariableInitializer = ArrayInitializer | Expression
      */
     public JCExpression variableInitializer() {
-        return S.token() == LBRACE ? arrayInitializer(S.pos(), null) : parseExpression();
+    	switch (S.token()) {
+		case LBRACE:
+			return arrayInitializer(S.pos(), null);
+		case LBRACKET:
+			return listInitializer(S.pos(),null);
+		default:
+			return parseExpression();
+		}
+        //return S.token() == LBRACE ? arrayInitializer(S.pos(), null) : parseExpression();
     }
 
+    /*add*/
+    /*
+     * ListInitializer
+     * */
+    public JCExpression listInitializer(int newpos, JCExpression t) {
+     	accept(LBRACKET);
+
+        ListBuffer<JCExpression> elems = new ListBuffer<JCExpression>();
+        if (S.token() == COMMA) {
+            S.nextToken();
+        } else if (S.token() != RBRACKET) {
+            elems.append(variableInitializer());
+            while (S.token() == COMMA) {
+                S.nextToken();
+                if (S.token() == RBRACKET) break;
+                elems.append(variableInitializer());
+            }
+        }
+        accept(RBRACKET);
+        return toP(F.at(newpos).NewList(t, List.<JCExpression>nil(), elems.toList()));
+    }
+    
     /** ParExpression = "(" Expression ")"
      */
     JCExpression parExpression() {

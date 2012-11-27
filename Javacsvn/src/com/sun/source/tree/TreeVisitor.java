@@ -85,6 +85,8 @@ public interface TreeVisitor<R,P> {
     R visitMethod(MethodTree node, P p);
     R visitModifiers(ModifiersTree node, P p);
     R visitNewArray(NewArrayTree node, P p);
+    /*add*/
+    R visitNewList(NewListTree node, P p);
     R visitNewClass(NewClassTree node, P p);
     R visitParenthesized(ParenthesizedTree node, P p);
     R visitReturn(ReturnTree node, P p);

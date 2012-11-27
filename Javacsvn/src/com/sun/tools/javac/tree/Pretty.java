@@ -877,6 +877,21 @@ public class Pretty extends JCTree.Visitor {
         }
     }
 
+    public void visitNewList(JCNewList tree) {
+        try {
+            
+            if (tree.elems != null) {
+                if (tree.elemtype != null) print("[]");
+                print("[");
+                printExprs(tree.elems);
+                print("]");
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+/*add*/
     public void visitNewArray(JCNewArray tree) {
         try {
             if (tree.elemtype != null) {
