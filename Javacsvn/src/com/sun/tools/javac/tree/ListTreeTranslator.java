@@ -3,6 +3,7 @@ package com.sun.tools.javac.tree;
 import com.sun.tools.javac.code.Type.ForAll;
 import com.sun.tools.javac.tree.JCTree.JCArrayAccess;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
+import com.sun.tools.javac.tree.JCTree.JCExpressionStatement;
 import com.sun.tools.javac.tree.JCTree.JCFieldAccess;
 import com.sun.tools.javac.tree.JCTree.JCIdent;
 import com.sun.tools.javac.tree.JCTree.JCListAccess;
@@ -29,11 +30,19 @@ public class ListTreeTranslator extends TreeTranslator {
 	public void visitIndexedL(JCListAccess tree) {
 		tree.indexed = translate(tree.indexed);
 		tree.index = translate(tree.index);
-		JCArrayAccess arrayTree = new JCArrayAccess(tree.indexed, tree.index);
-		arrayTree.setPos(tree.pos);
-		arrayTree.setType(tree.type);
-		result = arrayTree;
+
+		//list.get(2);
+		List<JCExpression> args=List.of(tree.index);
+		JCIdent selected = (JCIdent)tree.indexed;
+		Name get = names.fromString("get");
+		JCFieldAccess list_get = treeMaker.Select(selected, get);
+
+		JCMethodInvocation list_get_k = treeMaker.Apply(null,
+				list_get, args);
 		
+		//JCExpressionStatement
+		
+		result= list_get_k;	
 	}
 
 	@Override
@@ -42,13 +51,15 @@ public class ListTreeTranslator extends TreeTranslator {
 		tree.elems = translate(tree.elems);
 		// result = tree;
 
+		//methord: Arrays.asList()
 		JCIdent arrays = treeMaker.Ident(names.fromString("Arrays"));
 		Name asList = names.fromString("asList");
 		JCFieldAccess arrays_asList = treeMaker.Select(arrays, asList);
-
+		
 		JCMethodInvocation arrays_asListInvocation = treeMaker.Apply(null,
 				arrays_asList, tree.elems);
 
+		//NEW: new ArrayList()
 		List<JCExpression> args_new = List
 				.of((JCExpression) arrays_asListInvocation);
 

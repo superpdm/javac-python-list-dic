@@ -1970,17 +1970,7 @@ public class Attr extends JCTree.Visitor {
             owntype = elemtype;
             
         } else {
-            // we are seeing an untyped aggregate { ... }
-            // this is allowed only if the prototype is an array
-            if (pt.tag == CLASS) {
-                elemtype = owntype;
-            } else {
-                if (pt.tag != ERROR) {
-                    log.error(tree.pos(), "illegal.initializer.for.type",
-                              pt);
-                }
-                elemtype = types.createErrorType(pt);
-            }
+            elemtype=owntype;
         }
         if (tree.elems != null) {
             attribExprs(tree.elems, env, elemtype);
@@ -2160,10 +2150,7 @@ public class Attr extends JCTree.Visitor {
         Type owntype = types.createErrorType(tree.type);
         Type atype = attribExpr(tree.indexed, env);
         attribExpr(tree.index, env, syms.intType);
-        if (types.isArray(atype))
-            owntype = types.elemtype(atype);
-        else if (atype.tag != ERROR)
-            log.error(tree.pos(), "array.req.but.found", atype);
+        
         if ((pkind & VAR) == 0) owntype = capture(owntype);
         result = check(tree, owntype, VAR, pkind, pt);
     }
