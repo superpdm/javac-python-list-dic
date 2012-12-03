@@ -1968,10 +1968,7 @@ public class Attr extends JCTree.Visitor {
             elemtype = attribType(tree.elemtype, env);
             chk.validate(tree.elemtype, env);
             owntype = elemtype;
-            for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
-                attribExpr(l.head, env, syms.intType);
-                owntype = new ArrayType(owntype, syms.arrayClass);
-            }
+            
         } else {
             // we are seeing an untyped aggregate { ... }
             // this is allowed only if the prototype is an array

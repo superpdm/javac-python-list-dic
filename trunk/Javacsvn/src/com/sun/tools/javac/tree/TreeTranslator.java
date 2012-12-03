@@ -290,7 +290,6 @@ public class TreeTranslator extends JCTree.Visitor {
     }
     public void visitNewList(JCNewList tree) {
         tree.elemtype = translate(tree.elemtype);
-        tree.dims = translate(tree.dims);
         tree.elems = translate(tree.elems);
         result = tree;
         

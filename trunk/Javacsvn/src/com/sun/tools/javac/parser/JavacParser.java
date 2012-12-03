@@ -1550,7 +1550,7 @@ public class JavacParser implements Parser {
             }
         }
         accept(RBRACKET);
-        return toP(F.at(newpos).NewList(t, List.<JCExpression>nil(), elems.toList()));
+        return toP(F.at(newpos).NewList(t, elems.toList()));
     }
     
     /** ParExpression = "(" Expression ")"

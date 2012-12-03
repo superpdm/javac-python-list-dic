@@ -271,9 +271,8 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
     public JCTree visitNewList(NewListTree node, P p) {
         JCNewList t = (JCNewList) node;
         JCExpression elemtype = copy(t.elemtype, p);
-        List<JCExpression> dims = copy(t.dims, p);
         List<JCExpression> elems = copy(t.elems, p);
-        return M.at(t.pos).NewList(elemtype, dims, elems);
+        return M.at(t.pos).NewList(elemtype, elems);
     }
     
     public JCTree visitNewClass(NewClassTree node, P p) {
