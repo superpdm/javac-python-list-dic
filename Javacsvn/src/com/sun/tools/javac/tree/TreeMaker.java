@@ -352,10 +352,9 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCNewList NewList(JCExpression elemtype,
-            List<JCExpression> dims,
             List<JCExpression> elems)
 	{
-		JCNewList tree = new JCNewList(elemtype, dims, elems);
+		JCNewList tree = new JCNewList(elemtype, elems);
 		tree.pos = pos;
 		return tree;
 	}

@@ -1431,14 +1431,11 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 
     public static class JCNewList extends JCExpression implements NewListTree {
         public JCExpression elemtype;
-        public List<JCExpression> dims;
         public List<JCExpression> elems;
         protected JCNewList(JCExpression elemtype,
-                           List<JCExpression> dims,
                            List<JCExpression> elems)
         {
             this.elemtype = elemtype;
-            this.dims = dims;
             this.elems = elems;
         }
         @Override
@@ -1446,9 +1443,6 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 
         public Kind getKind() { return Kind.NEW_ARRAY; }
         public JCExpression getType() { return elemtype; }
-        public List<JCExpression> getDimensions() {
-            return dims;
-        }
         public List<JCExpression> getInitializers() {
             return elems;
         }
