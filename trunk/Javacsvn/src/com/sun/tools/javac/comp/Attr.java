@@ -2140,8 +2140,7 @@ public class Attr extends JCTree.Visitor {
         attribExpr(tree.index, env, syms.intType);
         if (types.isArray(atype))
             owntype = types.elemtype(atype);
-        else if (atype.tag != ERROR)
-            log.error(tree.pos(), "array.req.but.found", atype);
+
         if ((pkind & VAR) == 0) owntype = capture(owntype);
         result = check(tree, owntype, VAR, pkind, pt);
     }
