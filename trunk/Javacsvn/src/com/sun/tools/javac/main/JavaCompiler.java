@@ -38,16 +38,20 @@ import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static com.sun.tools.javac.code.Flags.UNATTRIBUTED;
 
 import javax.annotation.processing.Processor;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.util.Elements;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.DiagnosticListener;
+import javax.tools.JavaCompiler.CompilationTask;
 
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
+import com.sun.source.util.Trees;
 
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.util.*;
@@ -60,6 +64,7 @@ import com.sun.tools.javac.parser.*;
 import com.sun.tools.javac.comp.*;
 import com.sun.tools.javac.jvm.*;
 import com.sun.tools.javac.processing.*;
+
 
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 import static com.sun.tools.javac.main.OptionName.*;
@@ -829,7 +834,9 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                     enterTrees(stopIfError(CompileState.PARSE, parseFiles(sourceFileObjects))),
                     classnames);
 
+           // delegateCompiler.translateList();
             delegateCompiler.compile2();
+            
             delegateCompiler.close();
             elapsed_msec = delegateCompiler.elapsed_msec;
         } catch (Abort ex) {
@@ -1191,9 +1198,10 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             compileStates.put(env, CompileState.ATTR);
             JCTree tree=env.toplevel;
             env.toplevel.accept(new ListTreeTranslator(context));
+            
+            env.enclClass.sym.flags_field|=UNATTRIBUTED;
             attr.attrib(env);
             JCTree tree1=env.toplevel;
-            
         }
         finally {
             log.useSource(prev);
@@ -1632,5 +1640,17 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             h.setLevel(Level.ALL);
        }
 
+    }
+    
+    public void translateList()
+    {
+    	for (Env<AttrContext> env : todo) {
+			attr.attrib(env);
+		}
+    	todo=null;
+    	//JCCompilationUnit compilationUnit=
+    	//ClassSymbol classsSymbol=
+    	
+    	
     }
 }
