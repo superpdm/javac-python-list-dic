@@ -1059,9 +1059,13 @@ public class Pretty extends JCTree.Visitor {
     public void visitIndexedL(JCListAccess tree) {
         try {
             printExpr(tree.indexed, TreeInfo.postfixPrec);
-            print("{");
-            printExpr(tree.index);
-            print("}");
+            print("[");
+            printExpr(tree.term1);
+            print(",");
+            printExpr(tree.term2);
+            print(",");
+            printExpr(tree.term3);
+            print("]");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

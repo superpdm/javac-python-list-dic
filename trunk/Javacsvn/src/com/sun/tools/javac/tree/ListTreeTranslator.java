@@ -1,15 +1,7 @@
 package com.sun.tools.javac.tree;
 
-import static com.sun.tools.javac.code.TypeTags.ARRAY;
-import static com.sun.tools.javac.code.TypeTags.WILDCARD;
-import sun.util.logging.resources.logging;
-
-import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.code.Type.ForAll;
 import com.sun.tools.javac.tree.JCTree.JCArrayAccess;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
-import com.sun.tools.javac.tree.JCTree.JCExpressionStatement;
 import com.sun.tools.javac.tree.JCTree.JCFieldAccess;
 import com.sun.tools.javac.tree.JCTree.JCIdent;
 import com.sun.tools.javac.tree.JCTree.JCListAccess;
@@ -17,10 +9,10 @@ import com.sun.tools.javac.tree.JCTree.JCMethodInvocation;
 import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.JCTree.JCNewList;
 import com.sun.tools.javac.util.Context;
+import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Names;
-import com.sun.tools.javac.util.List;
 
 public class ListTreeTranslator extends TreeTranslator {
 	private final Names names ;
@@ -61,17 +53,16 @@ public class ListTreeTranslator extends TreeTranslator {
 	@Override
 	public void visitIndexedL(JCListAccess tree) {
 		tree.indexed = translate(tree.indexed);
-		tree.index = translate(tree.index);
+		tree.term1 = translate(tree.term1);
+		tree.term2 = translate(tree.term2);
+		tree.term3 = translate(tree.term3);
+		// __list_access();
+		List<JCExpression> args = List.of(tree.indexed,tree.term1,tree.term2,tree.term3);
+		JCIdent list_access = treeMaker.Ident(names.fromString("__list_access"));
 
-		// list.get(2);
-		List<JCExpression> args = List.of(tree.index);
-		JCIdent selected = (JCIdent) tree.indexed;
-		Name get = names.fromString("get");
-		JCFieldAccess list_get = treeMaker.Select(selected, get);
+		JCMethodInvocation list_access_meth = treeMaker.Apply(null, list_access, args);
 
-		JCMethodInvocation list_get_k = treeMaker.Apply(null, list_get, args);
-
-		result = list_get_k;
+		result = list_access_meth;
 	}
 
 	@Override
