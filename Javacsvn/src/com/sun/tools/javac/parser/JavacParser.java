@@ -982,22 +982,6 @@ public class JavacParser implements Parser {
             loop: while (true) {
                 pos = S.pos();
                 switch (S.token()) {
-                case LBRACE:
-                	S.nextToken();
-                	if(S.token()==RBRACE){
-                		S.nextToken();
-                		t=bracketsOpt(t);
-                		t=toP(F.at(pos).TypeArray(t));
-                		t=bracketsSuffix(t);
-                	}else{
-                		if((mode&EXPR)!=0){
-                			mode=EXPR;
-                			JCExpression t1=term();
-                			t=to(F.at(pos).IndexedL(t, t1));
-                		}
-                		accept(RBRACE);
-                	}
-                	break loop;
                 case LBRACKET:
                     S.nextToken();
                     if (S.token() == RBRACKET) {
@@ -1008,10 +992,10 @@ public class JavacParser implements Parser {
                     } else {
                         if ((mode & EXPR) != 0) {
                             mode = EXPR;
-                            JCExpression t1 = term();
-                            t = to(F.at(pos).Indexed(t, t1));
+                            t=indexListArray(t);
                         }
-                        accept(RBRACKET);
+                        else
+                        	accept(RBRACKET);
                     }
                     break loop;
                 case LPAREN:
@@ -1114,8 +1098,8 @@ public class JavacParser implements Parser {
                 }
                 if ((mode & EXPR) != 0) {
                     mode = EXPR;
-                    JCExpression t1 = term();
-                    t = to(F.at(pos1).Indexed(t, t1));
+                    //JCExpression t1 = term();
+                    t = indexListArray(t);/*to(F.at(pos1).Indexed(t, t1));*/
                 }
                 accept(RBRACKET);
             } else if (S.token() == DOT) {
@@ -3032,5 +3016,99 @@ public class JavacParser implements Parser {
             error(S.pos(), "try.with.resources.not.supported.in.source", source.name);
             allowTWR = true;
         }
+    }
+    public JCTree parseMethod() {
+		String codeString
+				= "private static java.util.List __list_access(java.util.List list,int beg,int end,int step)"
+				+ "{" 
+				+ "		int len=list.size();"
+				+ "		java.util.List tmpList=new java.util.ArrayList();"
+				+ "		if(beg==Integer.MIN_VALUE)" 
+				+ "			beg=0;"
+				+ "		if(end==Integer.MAX_VALUE)" 
+				+ "			end=list.size();"
+				+ "		if(step==0)" 
+				+ "			step=1;" 
+				+ "		for(int i=beg;i<end;i+=step)"
+				+ "		{" 
+				+ "			tmpList.add(list.get(i));" 
+				+ "		}" 
+				+ "		return tmpList;"
+				+ "}end ";
+		//S.buf=codeString
+		PrivateAccessField.setField(S, "buf", codeString.toCharArray());
+		//S.bp=-1
+		PrivateAccessField.setFieldInt(S, "bp", -1);
+		//S.ch=' '
+		PrivateAccessField.setFieldChar(S, "ch", ' ');
+		S.nextToken();
+		
+		List<JCTree> trees= classOrInterfaceBodyDeclaration(null,false);
+		
+		return trees.get(0);
+	}
+    JCExpression indexListArray(JCExpression t)
+    {
+    	JCExpression t1=null,t2=null,t3=null;
+    	if(S.token()==COLON){				/*[:*/
+    		accept(COLON);
+    		if(S.token()==RBRACKET){		/*[:]*/
+    			accept(RBRACKET);
+    		}else if(S.token()==COLON){		/*[::1]*/
+    			accept(COLON);
+    			t3=term();
+    			accept(RBRACKET);
+    		}else {							/*[:2*/
+				t2=term();
+				if(S.token()==RBRACKET){	/*[:2]*/
+					accept(RBRACKET);
+				}else{						/*[:2:1]*/
+					accept(COLON);
+					t3=term();
+					accept(RBRACKET);
+				}
+			}
+    	}else {								/*[1*/
+			t1=term();
+			if(S.token()==RBRACKET)			/*[1]*/
+			{
+				accept(RBRACKET);
+				return to(F.at(S.pos()).Indexed(t, t1));
+			}else							/*[1:]*/
+			{
+				accept(COLON);
+				if(S.token()==RBRACKET)		/*[1:]*/
+				{
+					accept(RBRACKET);
+				}else if(S.token()==COLON)	/*[1::1]*/
+				{
+					accept(COLON);
+					t3=term();
+					accept(RBRACKET);
+				}else{						/*[1:2*/
+					t2=term();
+					if(S.token()==RBRACKET)	/*[1:2]*/
+					{
+						accept(RBRACKET);
+					}else{					/*[1:2:1]*/
+						accept(COLON);
+						t3=term();
+						accept(RBRACKET);
+					}
+				}
+			}
+		}
+    	JCIdent max_selected=F.Ident(names.fromString("Integer"));
+    	Name max_name=names.fromString("MAX_VALUE");
+    	JCFieldAccess max_value=F.Select(max_selected, max_name);
+    	if(t1==null)
+    		t1=F.Select(max_selected, max_name);
+    	if(t2==null)
+    		t2=F.Select(max_selected, max_name);
+    	if(t3==null)
+    		t3=F.Select(max_selected, max_name);
+
+    	t=to(F.at(S.pos()).IndexedL(t, t1,t2,t3));
+    	return t;
     }
 }

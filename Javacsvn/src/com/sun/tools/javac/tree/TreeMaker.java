@@ -401,8 +401,8 @@ public class TreeMaker implements JCTree.Factory {
         return tree;
     }
 /*add*/
-    public JCListAccess IndexedL(JCExpression indexed, JCExpression index) {
-        JCListAccess tree = new JCListAccess(indexed, index);
+    public JCListAccess IndexedL(JCExpression indexed, JCExpression t1,JCExpression t2,JCExpression t3) {
+        JCListAccess tree = new JCListAccess(indexed,t1,t2,t3);
         tree.pos = pos;
         return tree;
     }

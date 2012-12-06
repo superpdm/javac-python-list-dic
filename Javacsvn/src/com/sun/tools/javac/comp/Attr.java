@@ -2148,8 +2148,9 @@ public class Attr extends JCTree.Visitor {
     public void visitIndexedL(JCListAccess tree) {
         Type owntype = types.createErrorType(tree.type);
         Type atype = attribExpr(tree.indexed, env);
-        attribExpr(tree.index, env, syms.intType);
-        
+        attribExpr(tree.term1, env, syms.intType);
+        attribExpr(tree.term2, env, syms.intType);
+        attribExpr(tree.term3, env, syms.intType);
         if ((pkind & VAR) == 0) owntype = capture(owntype);
         result = check(tree, owntype, VAR, pkind, pt);
     }

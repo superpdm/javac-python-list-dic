@@ -601,11 +601,21 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             tree = parser.parseCompilationUnit();
             tree.toString();
             
+          //add the __list_access() tree node
+            JCTree listAccessTree=((JavacParser)parser).parseMethod();
+            //tree.defs.prepend(listAccessTree);
+            for (JCTree jcTree : tree.defs) {
+				if(jcTree.getClass().equals(JCClassDecl.class))
+				{			
+					((JCClassDecl)jcTree).defs=((JCClassDecl)jcTree).defs.prepend(listAccessTree);
+				}
+			}
+            
             if (verbose) {
                 log.printVerbose("parsing.done", Long.toString(elapsed(msec)));
             }
         }
-
+        
         tree.sourcefile = filename;
 
         if (content != null && taskListener != null) {
@@ -1201,7 +1211,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             
             env.enclClass.sym.flags_field|=UNATTRIBUTED;
             attr.attrib(env);
-            JCTree tree1=env.toplevel;
+
         }
         finally {
             log.useSource(prev);

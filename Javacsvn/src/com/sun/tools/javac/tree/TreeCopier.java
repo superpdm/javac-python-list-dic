@@ -219,8 +219,10 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
     public JCTree visitListAccess(ListAccessTree node, P p) {
         JCListAccess t = (JCListAccess) node;
         JCExpression indexed = copy(t.indexed, p);
-        JCExpression index = copy(t.index, p);
-        return M.at(t.pos).Indexed(indexed, index);
+        JCExpression t1 = copy(t.term1, p);
+        JCExpression t2 = copy(t.term2, p);
+        JCExpression t3 = copy(t.term3, p);
+        return M.at(t.pos).IndexedL(indexed, t1,t2,t3);
     }
     
     public JCTree visitLabeledStatement(LabeledStatementTree node, P p) {

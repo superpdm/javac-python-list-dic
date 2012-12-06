@@ -1669,17 +1669,21 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
      */
     public static class JCListAccess extends JCExpression implements ListAccessTree {
         public JCExpression indexed;
-        public JCExpression index;
-        protected JCListAccess(JCExpression indexed, JCExpression index) {
+        public JCExpression term1,term2,term3;
+        protected JCListAccess(JCExpression indexed, JCExpression term1,JCExpression term2,JCExpression term3) {
             this.indexed = indexed;
-            this.index = index;
+            this.term1 = term1;
+            this.term2 = term2;
+            this.term3 = term3;
         }
         @Override
         public void accept(Visitor v) { v.visitIndexedL(this); }
 
         public Kind getKind() { return Kind.ARRAY_ACCESS; }
         public JCExpression getExpression() { return indexed; }
-        public JCExpression getIndex() { return index; }
+        public JCExpression getTerm1() { return term1; }
+        public JCExpression getTerm2() { return term2; }
+        public JCExpression getTerm3() { return term3; }
         @Override
         public <R,D> R accept(TreeVisitor<R,D> v, D d) {
             return v.visitListAccess(this, d);
