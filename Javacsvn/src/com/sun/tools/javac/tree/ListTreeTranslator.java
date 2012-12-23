@@ -40,10 +40,10 @@ public class ListTreeTranslator extends TreeTranslator {
 		isLefts.add(isLeft);	//save isLeft states, to solve nested problem such as list[list[1]=a]=a;
 		isLeft=true;			//set isLeft=true
         tree.lhs = translate(tree.lhs);				//translate left tree of assign
-        isLeft=isLefts.remove(isLefts.size()-1);	//restore states
         
+        isLeft=false;
         tree.rhs = translate(tree.rhs);				//translate right tree of assign
-        
+        isLeft=isLefts.remove(isLefts.size()-1);	//restore states
         result = tree;
     }
 	
