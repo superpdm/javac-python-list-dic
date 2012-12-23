@@ -2,6 +2,7 @@ package com.sun.tools.javac.tree;
 
 import java.util.Vector;
 
+import com.sun.org.apache.xpath.internal.Expression;
 import com.sun.tools.classfile.Opcode;
 import com.sun.tools.javac.tree.JCTree.JCArrayAccess;
 import com.sun.tools.javac.tree.JCTree.JCAssign;
@@ -27,8 +28,8 @@ public class ListTreeTranslator extends TreeTranslator {
 	private final Context context;
 	private final TreeMaker treeMaker;
 	private final Log log;
-	private Vector<Boolean> isLefts=new Vector<Boolean>();
 	private boolean isLeft=false;
+	private boolean isSet=false;
 	public ListTreeTranslator(Context context) {
 		this.context = context;
 		names = Names.instance(context);
@@ -37,14 +38,28 @@ public class ListTreeTranslator extends TreeTranslator {
 	}
 	@Override
 	public void visitAssign(JCAssign tree) {	//isLeft is used to different list[i]=a(true) or a=list[i](false)
-		isLefts.add(isLeft);	//save isLeft states, to solve nested problem such as list[list[1]=a]=a;
+		boolean tmpIsLeft=isLeft;	//save isLeft states, to solve nested problem such as list[list[1]=a]=a;
 		isLeft=true;			//set isLeft=true
-        tree.lhs = translate(tree.lhs);				//translate left tree of assign
+        boolean tmpIsSet=isSet;	//save isSet states
+        isSet=false;
+		tree.lhs = translate(tree.lhs);				//translate left tree of assign
         
         isLeft=false;
         tree.rhs = translate(tree.rhs);				//translate right tree of assign
-        isLeft=isLefts.remove(isLefts.size()-1);	//restore states
-        result = tree;
+        
+        if(isSet)
+        {
+        	JCArrayAccess arrayAccess=(JCArrayAccess)tree.lhs;
+        	JCFieldAccess list_set=treeMaker.Select(arrayAccess.indexed,names.fromString("set"));
+        	List<JCExpression> args = List.of(arrayAccess.index,tree.rhs);
+        	JCMethodInvocation list_set_invoc=treeMaker.Apply(null, list_set, args);
+        	result=list_set_invoc;
+        }
+        else 
+        	result=tree;
+        
+        isLeft=tmpIsLeft;	//restore states
+        isSet=tmpIsSet;
     }
 	
 	@Override
@@ -58,6 +73,7 @@ public class ListTreeTranslator extends TreeTranslator {
 		if (typeName.equals(names.fromString("java.util.List"))) // if list
 		{
 			//translate k[expr]==> k[expr+((expr<0)?k.size():0)]
+			tree.index=treeMaker.TypeCast(treeMaker.Ident(names.fromString("Integer")), tree.index);
 			JCLiteral false_part=treeMaker.Literal(4, 0);												//0
 			JCFieldAccess list_size_meth=treeMaker.Select(tree.indexed, names.fromString("size"));		//list.size
 			JCMethodInvocation true_part=treeMaker.Apply(null, list_size_meth, List.<JCExpression>nil());//list.size()
@@ -78,7 +94,9 @@ public class ListTreeTranslator extends TreeTranslator {
 				
 			}else 		//list.set
 			{
-				result=null;
+				isSet=true;
+				tree.index=indexed_binary;
+				result=tree;
 			}
 			
 		} else if (typeName.equals(names.fromString("Array"))) {// if array
