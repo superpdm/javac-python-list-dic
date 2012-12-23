@@ -878,8 +878,8 @@ public class JavacParser implements Parser {
                 t = term3();
                 if ((mode & TYPE) != 0 && S.token() == LT) {
                     // Could be a cast to a parameterized type
-                    int op = JCTree.LT;
                     int pos1 = S.pos();
+                    int op = JCTree.LT;
                     S.nextToken();
                     mode &= (EXPR | TYPE);
                     mode |= TYPEARG;
@@ -1078,6 +1078,9 @@ public class JavacParser implements Parser {
                 //return illegal();
             }
             break;
+        case LBRACKET:
+        	t = listInitializer(S.pos(), null);
+        	break;
         default:
             return illegal();
         }
@@ -1508,8 +1511,8 @@ public class JavacParser implements Parser {
     	switch (S.token()) {
 		case LBRACE:
 			return arrayInitializer(S.pos(), null);
-		case LBRACKET:
-			return listInitializer(S.pos(),null);
+//		case LBRACKET:
+//			return listInitializer(S.pos(),null);
 		default:
 			return parseExpression();
 		}
@@ -3018,47 +3021,14 @@ public class JavacParser implements Parser {
             allowTWR = true;
         }
     }
-    public JCTree parseMethod() {
-		String codeString
-				= "private static java.util.List __list_access(java.util.List list, int beg,"  
-				+ "			int end, int step) {                                         	"
-				+ "		int len = list.size();                                           	"
-				+ "		java.util.List tmpList = new java.util.ArrayList();              	"
-				+ "                                                                         "
-				+ "		if (step == Integer.MAX_VALUE)                                   	"
-				+ "			step = 1;                                                    	"
-				+ "		if (step > 0) {                                                  	"
-				+ "			beg += (beg < 0) ? len : 0;                                  	"
-				+ "			end += (end < 0) ? len : 0;                                     "
-				+ "                                                                      	"
-				+ "			if (beg == Integer.MAX_VALUE)                                	"
-				+ "				beg = 0;                                                 	"
-				+ "			if (end == Integer.MAX_VALUE)                                	"
-				+ "				end = len;                                               	"
-				+ "			for (int i = beg; i < end; i += step) {                      	"
-				+ "				tmpList.add(list.get(i));                                	"
-				+ "			}                                                            	"
-				+ "		} else {                                                         	"
-				+ "			beg += (beg < 0) ? len : 0;                                  	"
-				+ "			end += (end < 0) ? len : 0;                                  	"
-				+ "                                                                      	"
-				+ "			if (beg == Integer.MAX_VALUE)                                	"
-				+ "				beg = len - 1;                                           	"
-				+ "			if (end == Integer.MAX_VALUE)                                	"
-				+ "				end = -1;                                                	"
-				+ "                                                                         "
-				+ "			for (int i = beg; i > end; i += step) {                         "
-				+ "				tmpList.add(list.get(i));                                   "
-				+ "			}                                                               "
-				+ "		}                                                                   "
-				+ "		return tmpList;                                                     "
-				+ "	} end ";
-
-
-
-
+    /**
+     * call parser to parse a block of code
+     * @param code
+     * @return
+     */
+    public JCTree parseMethod(String code) {
 		//S.buf=codeString
-		PrivateAccessField.setField(S, "buf", codeString.toCharArray());
+		PrivateAccessField.setField(S, "buf", code.toCharArray());
 		//S.bp=-1
 		PrivateAccessField.setFieldInt(S, "bp", -1);
 		//S.ch=' '
@@ -3068,6 +3038,66 @@ public class JavacParser implements Parser {
 		List<JCTree> trees= classOrInterfaceBodyDeclaration(null,false);
 		return trees.get(0);
 	}
+    public List<JCTree> parseMethods()
+    {
+    	String code_list_access
+		= "private static java.util.List __list_access(java.util.List list, int beg,"  
+		+ "			int end, int step) {                                         	"
+		+ "		int len = list.size();                                           	"
+		+ "		java.util.List tmpList = new java.util.ArrayList();              	"
+		+ "                                                                         "
+		+ "		if (step == Integer.MAX_VALUE)                                   	"
+		+ "			step = 1;                                                    	"
+		+ "		if (step > 0) {                                                  	"
+		+ "			beg += (beg < 0) ? len : 0;                                  	"
+		+ "			end += (end < 0) ? len : 0;                                     "
+		+ "                                                                      	"
+		+ "			if (beg == Integer.MAX_VALUE)                                	"
+		+ "				beg = 0;                                                 	"
+		+ "			if (end == Integer.MAX_VALUE)                                	"
+		+ "				end = len;                                               	"
+		+ "			for (int i = beg; i < end; i += step) {                      	"
+		+ "				tmpList.add(list.get(i));                                	"
+		+ "			}                                                            	"
+		+ "		} else {                                                         	"
+		+ "			beg += (beg < 0) ? len : 0;                                  	"
+		+ "			end += (end < 0) ? len : 0;                                  	"
+		+ "                                                                      	"
+		+ "			if (beg == Integer.MAX_VALUE)                                	"
+		+ "				beg = len - 1;                                           	"
+		+ "			if (end == Integer.MAX_VALUE)                                	"
+		+ "				end = -1;                                                	"
+		+ "                                                                         "
+		+ "			for (int i = beg; i > end; i += step) {                         "
+		+ "				tmpList.add(list.get(i));                                   "
+		+ "			}                                                               "
+		+ "		}                                                                   "
+		+ "		return tmpList;                                                     "
+		+ "	} end ";
+    	
+    	String code_list_add=""
+    		+ "private static java.util.List __list_add(java.util.List aList, java.util.List bList)		"
+    		+ "{																						"
+    		+ "		java.util.List cList=new ArrayList(aList);											"
+    		+ "		cList.addAll(bList);																"
+    		+ "		return cList;																		"
+			+ "} end ";
+    	
+    	String code_list_mul=""
+    		+ " private static java.util.List __list_mul(java.util.List list, int time)			"
+    		+ "{																				"
+    		+ "	java.util.List resultList=new ArrayList();										"
+    		+ "	for(int i=0;i<time;i++)															"
+    		+ "	{																				"
+    		+ "		resultList.addAll(list);													"
+    		+ "	}																				"
+    		+ "	return resultList;																"
+    		+"}	end ";
+    	JCTree tree_list_access=parseMethod(code_list_access);
+    	JCTree tree_list_add=parseMethod(code_list_add);
+    	JCTree tree_list_mul=parseMethod(code_list_mul);
+    	return List.<JCTree>of(tree_list_access,tree_list_add,tree_list_mul);
+    }
     JCExpression indexListArray(JCExpression t)
     {
     	JCExpression t1=null,t2=null,t3=null;

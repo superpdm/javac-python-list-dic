@@ -1598,6 +1598,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public Symbol getOperator() {
             return operator;
         }
+        public int getOpcode(){ return opcode;}
         @Override
         public <R,D> R accept(TreeVisitor<R,D> v, D d) {
             return v.visitBinary(this, d);
