@@ -78,6 +78,7 @@ public class JavacParser implements Parser {
 
     /** Construct a parser from a given scanner, tree factory and log.
      */
+
     protected JavacParser(ParserFactory fac,
                      Lexer S,
                      boolean keepDocComments,
@@ -3019,22 +3020,43 @@ public class JavacParser implements Parser {
     }
     public JCTree parseMethod() {
 		String codeString
-				= "private static java.util.List __list_access(java.util.List list,int beg,int end,int step)"
-				+ "{" 
-				+ "		int len=list.size();"
-				+ "		java.util.List tmpList=new java.util.ArrayList();"
-				+ "		if(beg==Integer.MIN_VALUE)" 
-				+ "			beg=0;"
-				+ "		if(end==Integer.MAX_VALUE)" 
-				+ "			end=list.size();"
-				+ "		if(step==0)" 
-				+ "			step=1;" 
-				+ "		for(int i=beg;i<end;i+=step)"
-				+ "		{" 
-				+ "			tmpList.add(list.get(i));" 
-				+ "		}" 
-				+ "		return tmpList;"
-				+ "}end ";
+				= "private static java.util.List __list_access(java.util.List list, int beg,"  
+				+ "			int end, int step) {                                         	"
+				+ "		int len = list.size();                                           	"
+				+ "		java.util.List tmpList = new java.util.ArrayList();              	"
+				+ "                                                                         "
+				+ "		if (step == Integer.MAX_VALUE)                                   	"
+				+ "			step = 1;                                                    	"
+				+ "		if (step > 0) {                                                  	"
+				+ "			beg += (beg < 0) ? len : 0;                                  	"
+				+ "			end += (end < 0) ? len : 0;                                     "
+				+ "                                                                      	"
+				+ "			if (beg == Integer.MAX_VALUE)                                	"
+				+ "				beg = 0;                                                 	"
+				+ "			if (end == Integer.MAX_VALUE)                                	"
+				+ "				end = len;                                               	"
+				+ "			for (int i = beg; i < end; i += step) {                      	"
+				+ "				tmpList.add(list.get(i));                                	"
+				+ "			}                                                            	"
+				+ "		} else {                                                         	"
+				+ "			beg += (beg < 0) ? len : 0;                                  	"
+				+ "			end += (end < 0) ? len : 0;                                  	"
+				+ "                                                                      	"
+				+ "			if (beg == Integer.MAX_VALUE)                                	"
+				+ "				beg = len - 1;                                           	"
+				+ "			if (end == Integer.MAX_VALUE)                                	"
+				+ "				end = -1;                                                	"
+				+ "                                                                         "
+				+ "			for (int i = beg; i > end; i += step) {                         "
+				+ "				tmpList.add(list.get(i));                                   "
+				+ "			}                                                               "
+				+ "		}                                                                   "
+				+ "		return tmpList;                                                     "
+				+ "	} end ";
+
+
+
+
 		//S.buf=codeString
 		PrivateAccessField.setField(S, "buf", codeString.toCharArray());
 		//S.bp=-1
@@ -3044,7 +3066,6 @@ public class JavacParser implements Parser {
 		S.nextToken();
 		
 		List<JCTree> trees= classOrInterfaceBodyDeclaration(null,false);
-		
 		return trees.get(0);
 	}
     JCExpression indexListArray(JCExpression t)
@@ -3112,3 +3133,36 @@ public class JavacParser implements Parser {
     	return t;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
