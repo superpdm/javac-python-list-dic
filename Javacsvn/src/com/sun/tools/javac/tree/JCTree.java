@@ -1429,6 +1429,33 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
     }
 
+    public static class JCListComp extends JCExpression implements ListComp {
+    	
+        public JCListComp(){
+			
+		}
+        @Override
+        public void accept(Visitor v) { v.visitListComp(this); }
+
+        public Kind getKind() { return Kind.CLASS; }
+        
+       
+        @Override
+        public int getTag() {
+            return NEWCLASS;
+        }
+		@Override
+		public <R, D> R accept(TreeVisitor<R, D> v, D d) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		@Override
+		public Tree getType() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+    }
+    
     public static class JCNewList extends JCExpression implements NewListTree {
         public JCExpression elemtype;
         public List<JCExpression> elems;
@@ -2277,7 +2304,8 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void visitNewClass(JCNewClass that)           { visitTree(that); }
         public void visitNewArray(JCNewArray that)           { visitTree(that); }
         /*add*/
-        public void visitNewList(JCNewList that)           { visitTree(that); }
+        public void visitListComp(JCListComp that)			 {	visitTree(that);}
+        public void visitNewList(JCNewList that)             { visitTree(that); }
         public void visitParens(JCParens that)               { visitTree(that); }
         public void visitAssign(JCAssign that)               { visitTree(that); }
         public void visitAssignop(JCAssignOp that)           { visitTree(that); }
