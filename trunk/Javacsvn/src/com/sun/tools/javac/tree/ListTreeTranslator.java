@@ -4,6 +4,14 @@ import java.util.Vector;
 
 import com.sun.org.apache.xpath.internal.Expression;
 import com.sun.tools.classfile.Opcode;
+import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
+import com.sun.tools.javac.code.Symbol.TypeSymbol;
+import com.sun.tools.javac.comp.Attr;
+import com.sun.tools.javac.comp.AttrContext;
+import com.sun.tools.javac.comp.Env;
+import com.sun.tools.javac.comp.MemberEnter;
 import com.sun.tools.javac.tree.JCTree.JCArrayAccess;
 import com.sun.tools.javac.tree.JCTree.JCAssign;
 import com.sun.tools.javac.tree.JCTree.JCBinary;
@@ -13,6 +21,7 @@ import com.sun.tools.javac.tree.JCTree.JCFieldAccess;
 import com.sun.tools.javac.tree.JCTree.JCIdent;
 import com.sun.tools.javac.tree.JCTree.JCListAccess;
 import com.sun.tools.javac.tree.JCTree.JCLiteral;
+import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import com.sun.tools.javac.tree.JCTree.JCMethodInvocation;
 import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.JCTree.JCNewList;
@@ -27,17 +36,22 @@ public class ListTreeTranslator extends TreeTranslator {
 	private final Names names;
 	private final Context context;
 	private final TreeMaker treeMaker;
+	private final Attr attr;
+	private final MemberEnter memberEnter;
 	private final Log log;
 	private boolean isLeft = false;
 	private boolean isSet = false;
-
+	private MethodSymbol methodSymbol=null;
 	public ListTreeTranslator(Context context) {
 		this.context = context;
 		names = Names.instance(context);
 		treeMaker = TreeMaker.instance(context);
+		attr = Attr.instance(context);
 		log = Log.instance(context);
+		memberEnter=MemberEnter.instance(context);
 	}
 
+	
 	@Override
 	public void visitAssign(JCAssign tree) { // isLeft is used to different
 		// list[i]=a(true) or
@@ -74,7 +88,6 @@ public class ListTreeTranslator extends TreeTranslator {
 
 		JCIdent selected = (JCIdent) tree.indexed;
 		Name typeName = selected.type.tsym.flatName();
-
 		if (typeName.equals(names.fromString("java.util.List"))) // if list
 		{
 			// translate k[expr]==> k[expr+((expr<0)?k.size():0)]
@@ -158,7 +171,12 @@ public class ListTreeTranslator extends TreeTranslator {
 
 		JCNewClass newClass = treeMaker.NewClass(null, null, class_new,
 				args_new, null);
-
+		//memberEnter.
+		//attr.attribStat(newClass, newClass.)
+		Env<AttrContext> aEnv=null;
+//		TypeSymbol tsym=TypeSymbol.formFlatName(names.fromString("java.util.List"), );
+//		Type aType=Type
+//		newClass.setType(new Type(tag, tsym));
 		result = newClass;
 	}
 
@@ -168,13 +186,13 @@ public class ListTreeTranslator extends TreeTranslator {
 		tree.rhs = translate(tree.rhs);
 
 		Name lTypeName = tree.lhs.type.tsym.flatName();
-		Name rTypeName = tree.lhs.type.tsym.flatName();
+		Name rTypeName = tree.rhs.type.tsym.flatName();
 		Name listName = names.fromString("java.util.List");
 		Name intName = names.fromString("java.lang.Integer");
 		if (lTypeName.equals(listName) || rTypeName.equals(listName)) {
 			if (lTypeName.equals(listName) && rTypeName.equals(listName)) { // list
-																			// op
-																			// list
+				// op
+				// list
 
 				if (tree.getOpcode() == JCTree.PLUS) {
 					JCIdent meth = treeMaker.Ident(names
@@ -184,34 +202,36 @@ public class ListTreeTranslator extends TreeTranslator {
 							meth, args);
 					result = list_add_invoc;
 				}
-				
-			} else if (lTypeName.equals(intName) && rTypeName.equals(listName))
-			{
-				//int op list
-				JCIdent meth = treeMaker.Ident(names
-						.fromString("__list_mul"));
+
+			} else if (lTypeName.equals(intName) && rTypeName.equals(listName)) {
+				// int op list
+				JCIdent meth = treeMaker.Ident(names.fromString("__list_mul"));
 				List<JCExpression> args = List.of(tree.rhs, tree.lhs);
-				JCMethodInvocation list_mul_invoc = treeMaker.Apply(null,
-						meth, args);
+				JCMethodInvocation list_mul_invoc = treeMaker.Apply(null, meth,
+						args);
 				result = list_mul_invoc;
-					
-			}else if (lTypeName.equals(listName) && rTypeName.equals(intName)) {
-				//list op int
-				JCIdent meth = treeMaker.Ident(names
-						.fromString("__list_mul"));
+
+			} else if (lTypeName.equals(listName) && rTypeName.equals(intName)) {
+				// list op int
+				JCIdent meth = treeMaker.Ident(names.fromString("__list_mul"));
 				List<JCExpression> args = List.of(tree.lhs, tree.rhs);
-				JCMethodInvocation list_mul_invoc = treeMaker.Apply(null,
-						meth, args);
+				JCMethodInvocation list_mul_invoc = treeMaker.Apply(null, meth,
+						args);
 				result = list_mul_invoc;
-			}
-			else {
+			} else {
 				// list op other type
 				log.error(tree.pos(), "illegal.start.of.expr");
 			}
-		}else
-		{
+		} else {
 			result = tree;
 		}
 
+	}
+
+
+	@Override
+	public void visitMethodDef(JCMethodDecl tree) {
+		// TODO Auto-generated method stub
+		super.visitMethodDef(tree);
 	}
 }
