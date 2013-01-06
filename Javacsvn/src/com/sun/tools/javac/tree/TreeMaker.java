@@ -200,6 +200,17 @@ public class TreeMaker implements JCTree.Factory {
         return tree;
     }
 
+    public JCBlockExp BlockExp(long flags, List<JCStatement> stats){
+    	JCBlockExp tree=new JCBlockExp(flags, stats);
+    	tree.pos=pos;
+    	return tree;
+    }
+    public JCBlockExp BlockExp(JCBlock block){
+    	JCBlockExp tree=new JCBlockExp(block.flags, block.stats);
+    	tree.pos=pos;
+    	return tree;
+    }
+    
     public JCDoWhileLoop DoLoop(JCStatement body, JCExpression cond) {
         JCDoWhileLoop tree = new JCDoWhileLoop(body, cond);
         tree.pos = pos;

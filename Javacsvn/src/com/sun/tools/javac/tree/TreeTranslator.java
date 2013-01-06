@@ -160,7 +160,10 @@ public class TreeTranslator extends JCTree.Visitor {
         tree.stats = translate(tree.stats);
         result = tree;
     }
-
+    public void visitBlockExp(JCBlockExp tree) {
+        tree.block.stats = translate(tree.block.stats);
+        result = tree;
+    }
     public void visitDoLoop(JCDoWhileLoop tree) {
         tree.body = translate(tree.body);
         tree.cond = translate(tree.cond);

@@ -801,7 +801,11 @@ public class Flow extends TreeScanner {
         scanStats(tree.stats);
         nextadr = nextadrPrev;
     }
-
+    public void visitBlockExp(JCBlockExp tree) {
+        int nextadrPrev = nextadr;
+        scanStats(tree.block.stats);
+        nextadr = nextadrPrev;
+    }
     public void visitDoLoop(JCDoWhileLoop tree) {
         ListBuffer<PendingExit> prevPendingExits = pendingExits;
         boolean prevLoopPassTwo = loopPassTwo;

@@ -1036,6 +1036,24 @@ public class Gen extends JCTree.Visitor {
             code.pendingStatPos = Position.NOPOS;
         }
     }
+    public void visitBlockExp(JCBlockExp betree) {
+    	JCBlock tree=betree.block;
+        int limit = code.nextreg;
+        Env<GenContext> localEnv = env.dup(tree, new GenContext());
+        
+        for(int i=0;i<tree.stats.size()-1;i++)
+        	genStat(tree.stats.get(i), localEnv);
+        
+        genExpr(betree.getExpression(), pt);
+        //genStats(tree.stats.subList(fromIndex, toIndex), localEnv);
+        
+        // End the scope of all block-local variables in variable info.
+        if (env.tree.getTag() != JCTree.METHODDEF) {
+            code.statBegin(tree.endpos);
+            code.endScopes(limit);
+            code.pendingStatPos = Position.NOPOS;
+        }
+    }
 
     public void visitDoLoop(JCDoWhileLoop tree) {
         genLoop(tree, tree.body, tree.cond, List.<JCExpressionStatement>nil(), false);

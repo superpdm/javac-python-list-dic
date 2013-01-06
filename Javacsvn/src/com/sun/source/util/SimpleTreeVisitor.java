@@ -88,6 +88,10 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
         return defaultAction(node, p);
     }
 
+    public R visitBlockExp(BlockExpTree node, P p) {
+        return defaultAction(node, p);
+    }
+    
     public R visitDoWhileLoop(DoWhileLoopTree node, P p) {
         return defaultAction(node, p);
     }
@@ -263,4 +267,5 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
     public R visitOther(Tree node, P p) {
         return defaultAction(node, p);
     }
+
 }
