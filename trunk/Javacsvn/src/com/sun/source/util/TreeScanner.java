@@ -159,6 +159,10 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
         return scan(node.getStatements(), p);
     }
 
+    public R visitBlockExp(BlockExpTree node, P p) {
+        return scan(node.getStatements(), p);
+    }
+    
     public R visitDoWhileLoop(DoWhileLoopTree node, P p) {
         R r = scan(node.getStatement(), p);
         r = scanAndReduce(node.getCondition(), p, r);

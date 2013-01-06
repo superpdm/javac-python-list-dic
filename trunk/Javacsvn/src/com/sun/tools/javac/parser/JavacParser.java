@@ -1079,7 +1079,14 @@ public class JavacParser implements Parser {
             }
             break;
         case LBRACKET:
+        	
         	t = listInitializer(S.pos(), null);
+        	break;
+        case LBRACE:
+        	
+        	JCBlock block=block();
+        	JCBlockExp blockExp=F.at(S.pos()).BlockExp(block);
+        	t=blockExp;
         	break;
         default:
             return illegal();
@@ -1541,7 +1548,7 @@ public class JavacParser implements Parser {
         return toP(F.at(newpos).NewList(t, elems.toList()));
     }
     
-    /** ParExpression = "(" Expression ")"
+    /** ParExpression = "(" BlockExpression ")"
      */
     JCExpression parExpression() {
         accept(LPAREN);
@@ -1549,7 +1556,11 @@ public class JavacParser implements Parser {
         accept(RPAREN);
         return t;
     }
+    
 
+    /** BlockExpression = BlockStatements
+     * */
+    
     /** Block = "{" BlockStatements "}"
      */
     JCBlock block(int pos, long flags) {

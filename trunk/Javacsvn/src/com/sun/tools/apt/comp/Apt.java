@@ -153,7 +153,9 @@ public class Apt extends ListBuffer<Env<AttrContext>> {
         public void visitBlock(JCTree.JCBlock tree) {
             ; // Do nothing.
         }
-
+        public void visitBlockExp(JCTree.JCBlockExp tree) {
+            ; // Do nothing.
+        }
 
         // should add nested classes to packages, etc.
         public void visitClassDef(JCTree.JCClassDecl tree) {

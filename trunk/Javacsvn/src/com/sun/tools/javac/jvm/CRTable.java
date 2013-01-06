@@ -265,6 +265,12 @@ implements CRTFlags {
             result = sr;
         }
 
+        public void visitBlockExp(JCBlockExp betree) {
+        	JCBlock tree=betree.block;
+            SourceRange sr = new SourceRange(startPos(tree), endPos(tree));
+            csp(tree.stats);    // doesn't compare because block's ending position is defined
+            result = sr;
+        }
         public void visitDoLoop(JCDoWhileLoop tree) {
             SourceRange sr = new SourceRange(startPos(tree), endPos(tree));
             sr.mergeWith(csp(tree.body));

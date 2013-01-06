@@ -275,6 +275,18 @@ public class Pretty extends JCTree.Visitor {
         align();
         print("}");
     }
+    
+    /** Print a block exp.
+     */
+    public void printBlockExp(List<? extends JCTree> stats) throws IOException {
+        print("(");
+        println();
+        indent();
+        printStats(stats);
+        undent();
+        align();
+        print(")");
+    }
 
     /** Print a block.
      */
@@ -534,6 +546,14 @@ public class Pretty extends JCTree.Visitor {
         try {
             printFlags(tree.flags);
             printBlock(tree.stats);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+    public void visitBlockExp(JCBlockExp tree) {
+        try {
+            printFlags(tree.block.flags);
+            printBlockExp(tree.block.stats);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

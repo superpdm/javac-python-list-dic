@@ -111,6 +111,11 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         List<JCStatement> stats = copy(t.stats, p);
         return M.at(t.pos).Block(t.flags, stats);
     }
+    public JCTree visitBlockExp(BlockExpTree node, P p) {
+        JCBlockExp t = (JCBlockExp) node;
+        List<JCStatement> stats = copy(t.block.stats, p);
+        return M.at(t.pos).BlockExp(t.block.flags, stats);
+    }
 
     public JCTree visitBreak(BreakTree node, P p) {
         JCBreak t = (JCBreak) node;

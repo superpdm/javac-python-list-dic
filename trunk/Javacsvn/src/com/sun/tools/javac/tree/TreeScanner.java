@@ -103,6 +103,10 @@ public class TreeScanner extends Visitor {
         scan(tree.stats);
     }
 
+    public void visitBlockExp(JCBlockExp tree) {
+        scan(tree.block.stats);
+    }
+    
     public void visitDoLoop(JCDoWhileLoop tree) {
         scan(tree.body);
         scan(tree.cond);

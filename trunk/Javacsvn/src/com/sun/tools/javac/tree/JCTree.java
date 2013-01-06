@@ -795,7 +795,44 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
             return BLOCK;
         }
     }
+    /**
+     * A statement block.
+     * @param stats statements
+     * @param flags flags
+     */
+    public static class JCBlockExp extends JCExpression implements BlockExpTree {
+        public JCBlock block;
+        protected JCBlockExp(long flags, List<JCStatement> stats) {
+        	block=new JCBlock(flags, stats);
+            this.block.stats = stats;
+            this.block.flags = flags;
+        }
+        @Override
+        public void accept(Visitor v) { v.visitBlockExp(this); }
 
+        public Kind getKind() { return Kind.BLOCK; }
+        public List<JCStatement> getStatements() {
+            return block.stats;
+        }
+        public boolean isStatic() { return (block.flags & Flags.STATIC) != 0; }
+        @Override
+        public <R,D> R accept(TreeVisitor<R,D> v, D d) {
+            return v.visitBlockExp(this, d);
+        }
+
+        @Override
+        public int getTag() {
+            return BLOCK;
+        }
+		@Override
+		public JCExpression getExpression() {
+			
+			return ((JCExpressionStatement)block.stats.last()).getExpression();
+		}
+		public void setEndpos(int pos){
+			block.endpos=pos;
+		}
+    }
     /**
      * A do loop
      */
@@ -2282,6 +2319,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void visitVarDef(JCVariableDecl that)         { visitTree(that); }
         public void visitSkip(JCSkip that)                   { visitTree(that); }
         public void visitBlock(JCBlock that)                 { visitTree(that); }
+        public void visitBlockExp(JCBlockExp that)           { visitTree(that); }
         public void visitDoLoop(JCDoWhileLoop that)          { visitTree(that); }
         public void visitWhileLoop(JCWhileLoop that)         { visitTree(that); }
         public void visitForLoop(JCForLoop that)             { visitTree(that); }

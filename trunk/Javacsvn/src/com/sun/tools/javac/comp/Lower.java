@@ -3311,6 +3311,19 @@ public class Lower extends TreeTranslator {
         super.visitBlock(tree);
         currentMethodSym = oldMethodSym;
     }
+    public void visitBlockExp(JCBlockExp betree) {
+    	JCBlock tree=betree.block;
+        MethodSymbol oldMethodSym = currentMethodSym;
+        if (currentMethodSym == null) {
+            // Block is a static or instance initializer.
+            currentMethodSym =
+                new MethodSymbol(tree.flags | BLOCK,
+                                 names.empty, null,
+                                 currentClass);
+        }
+        super.visitBlockExp(betree);
+        currentMethodSym = oldMethodSym;
+    }
 
     public void visitDoLoop(JCDoWhileLoop tree) {
         tree.body = translate(tree.body);
