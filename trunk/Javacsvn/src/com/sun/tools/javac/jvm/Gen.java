@@ -1044,7 +1044,7 @@ public class Gen extends JCTree.Visitor {
         for(int i=0;i<tree.stats.size()-1;i++)
         	genStat(tree.stats.get(i), localEnv);
         
-        genExpr(betree.getExpression(), pt);
+        result=genExpr(betree.getExpression(), pt);
         //genStats(tree.stats.subList(fromIndex, toIndex), localEnv);
         
         // End the scope of all block-local variables in variable info.

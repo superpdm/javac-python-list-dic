@@ -1085,7 +1085,13 @@ public class JavacParser implements Parser {
         case LBRACE:
         	
         	JCBlock block=block();
+        	
         	JCBlockExp blockExp=F.at(S.pos()).BlockExp(block);
+        	try {
+				blockExp.getExpression();
+			} catch (Exception e) {
+				return illegal();
+			}
         	t=blockExp;
         	break;
         default:
@@ -1518,8 +1524,6 @@ public class JavacParser implements Parser {
     	switch (S.token()) {
 		case LBRACE:
 			return arrayInitializer(S.pos(), null);
-//		case LBRACKET:
-//			return listInitializer(S.pos(),null);
 		default:
 			return parseExpression();
 		}
@@ -1537,11 +1541,11 @@ public class JavacParser implements Parser {
         if (S.token() == COMMA) {
             S.nextToken();
         } else if (S.token() != RBRACKET) {
-            elems.append(variableInitializer());
+            elems.append(parseExpression());
             while (S.token() == COMMA) {
                 S.nextToken();
                 if (S.token() == RBRACKET) break;
-                elems.append(variableInitializer());
+                elems.append(parseExpression());
             }
         }
         accept(RBRACKET);
@@ -2208,7 +2212,10 @@ public class JavacParser implements Parser {
         JCExpression init = null;
         if (S.token() == EQ) {
             S.nextToken();
-            init = variableInitializer();
+            if(type instanceof JCArrayTypeTree)
+            	init = arrayInitializer(S.pos(), null);
+            else 
+            	init = parseExpression();
         }
         else if (reqInit) syntaxError(S.pos(), "expected", EQ);
         JCVariableDecl result =
