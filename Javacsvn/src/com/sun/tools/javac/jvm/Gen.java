@@ -679,6 +679,7 @@ public class Gen extends JCTree.Visitor {
      */
     public void genDef(JCTree tree, Env<GenContext> env) {
         Env<GenContext> prevEnv = this.env;
+        
         try {
             this.env = env;
             tree.accept(this);
@@ -933,7 +934,7 @@ public class Gen extends JCTree.Visitor {
                         // generate a small loop instead
                         int startpc = code.entryPoint();
                         CondItem c = items.makeCondItem(goto_);
-                        code.resolve(c.jumpTrue(), startpc);
+                        code.resolve(c.jumpTrue(), startpc,0);
                     }
                 }
                 if (genCrt)
@@ -1085,6 +1086,7 @@ public class Gen extends JCTree.Visitor {
                              boolean testFirst) {
             Env<GenContext> loopEnv = env.dup(loop, new GenContext());
             int startpc = code.entryPoint();
+            int stacksize=code.state.stacksize;
             if (testFirst) {
                 CondItem c;
                 if (cond != null) {
@@ -1098,7 +1100,7 @@ public class Gen extends JCTree.Visitor {
                 genStat(body, loopEnv, CRT_STATEMENT | CRT_FLOW_TARGET);
                 code.resolve(loopEnv.info.cont);
                 genStats(step, loopEnv);
-                code.resolve(code.branch(goto_), startpc);
+                code.resolve(code.branch(goto_), startpc,stacksize);
                 code.resolve(loopDone);
             } else {
                 genStat(body, loopEnv, CRT_STATEMENT | CRT_FLOW_TARGET);
@@ -1111,7 +1113,7 @@ public class Gen extends JCTree.Visitor {
                 } else {
                     c = items.makeCondItem(goto_);
                 }
-                code.resolve(c.jumpTrue(), startpc);
+                code.resolve(c.jumpTrue(), startpc,0);
                 code.resolve(c.falseJumps);
             }
             code.resolve(loopEnv.info.exit);

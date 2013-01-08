@@ -1436,12 +1436,12 @@ public class Code {
 
     /** Resolve chain to point to given target.
      */
-    public void resolve(Chain chain, int target) {
+    public void resolve(Chain chain, int target,int stacksize) {
         boolean changed = false;
         State newState = state;
         for (; chain != null; chain = chain.next) {
             Assert.check(state != chain.state
-                    && (target > chain.pc || state.stacksize == 0));
+                    && (target > chain.pc || state.stacksize == stacksize));
             if (target >= cp) {
                 target = cp;
             } else if (get1(target) == goto_) {
@@ -1510,7 +1510,7 @@ public class Code {
     public void resolvePending() {
         Chain x = pendingJumps;
         pendingJumps = null;
-        resolve(x, cp);
+        resolve(x, cp,0);
     }
 
     /** Merge the jumps in of two chains into one.
