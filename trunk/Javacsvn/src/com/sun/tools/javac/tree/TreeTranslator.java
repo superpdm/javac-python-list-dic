@@ -284,6 +284,13 @@ public class TreeTranslator extends JCTree.Visitor {
         tree.def = translate(tree.def);
         result = tree;
     }
+    public void visitListComp(JCListComp tree) {
+        tree.decl = translate(tree.decl);
+        tree.expr = translate(tree.expr);
+        tree.listExpr = translate(tree.listExpr);
+        tree.ifExpr = translate(tree.ifExpr);
+        result = tree;
+    }
 
     public void visitNewArray(JCNewArray tree) {
         tree.elemtype = translate(tree.elemtype);

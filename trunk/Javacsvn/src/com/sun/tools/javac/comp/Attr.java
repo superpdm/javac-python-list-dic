@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.lang.model.element.ElementKind;
 import javax.tools.JavaFileObject;
 
@@ -1591,6 +1590,12 @@ public class Attr extends JCTree.Visitor {
             return (typeargtypes == null) ? mt : (Type)new ForAll(typeargtypes, mt);
         }
 
+    public void visitListComp(JCListComp tree) {
+    	//Type owntype = types.createErrorType(tree.type);
+        //Type vatType=attribType(tree.decl.vartype, env);
+        /*unfinished!*/
+
+	}
     public void visitNewClass(JCNewClass tree) {
         Type owntype = types.createErrorType(tree.type);
 
@@ -3450,6 +3455,7 @@ public class Attr extends JCTree.Visitor {
                 that.operator = new OperatorSymbol(names.empty, syms.unknownType, -1, syms.noSymbol);
             super.visitUnary(that);
         }
+
     }
     // </editor-fold>
 }

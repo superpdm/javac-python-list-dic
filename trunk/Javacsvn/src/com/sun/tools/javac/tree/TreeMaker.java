@@ -210,6 +210,11 @@ public class TreeMaker implements JCTree.Factory {
     	tree.pos=pos;
     	return tree;
     }
+    public JCListComp ListComp(JCExpression expr,JCVariableDecl decl,JCExpression listExpr,JCExpression ifExpr){
+    	JCListComp tree=new JCListComp(expr,decl,listExpr,ifExpr);
+    	tree.pos=pos;
+    	return tree;
+    }
     
     public JCDoWhileLoop DoLoop(JCStatement body, JCExpression cond) {
         JCDoWhileLoop tree = new JCDoWhileLoop(body, cond);
