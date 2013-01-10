@@ -601,15 +601,15 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             tree = parser.parseCompilationUnit();
             tree.toString();
             
-          //add the __list_access() tree node
-            List<JCTree> listTrees=((JavacParser)parser).parseMethods();
-            //tree.defs.prepend(listAccessTree);
-            for (JCTree jcTree : tree.defs) {
-				if(jcTree.getClass().equals(JCClassDecl.class))
-				{			
-					((JCClassDecl)jcTree).defs=((JCClassDecl)jcTree).defs.prependList(listTrees);
-				}
-			}
+//          //add the __list_access() tree node
+//            List<JCTree> listTrees=((JavacParser)parser).parseMethods();
+//            //tree.defs.prepend(listAccessTree);
+//            for (JCTree jcTree : tree.defs) {
+//				if(jcTree.getClass().equals(JCClassDecl.class))
+//				{			
+//					((JCClassDecl)jcTree).defs=((JCClassDecl)jcTree).defs.prependList(listTrees);
+//				}
+//			}
             
             if (verbose) {
                 log.printVerbose("parsing.done", Long.toString(elapsed(msec)));

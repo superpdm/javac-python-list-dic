@@ -570,6 +570,11 @@ public interface Tree {
          */
         ANNOTATION_TYPE(ClassTree.class),
 
+        NEW_LIST(NewListTree.class),
+        LIST_COMP(ListCompTree.class),
+        LIST_ACCESS(ListAccessTree.class),
+        
+        
         /**
          * An implementation-reserved node. This is the not the node
          * you are looking for.

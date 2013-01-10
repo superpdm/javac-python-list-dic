@@ -486,6 +486,25 @@ public class Pretty extends JCTree.Visitor {
         }
     }
 
+    public void visitListComp(JCListComp tree) {
+		try{
+			print("[");
+			print(tree.expr);
+			print(" for(");
+			print(tree.decl);
+			print(":");
+			print(tree.listExpr);
+			print(")");
+			if(tree.ifExpr!=null)
+			{
+				print(" if ");
+				print(tree.ifExpr);
+			}
+			print("]");
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
     public void visitVarDef(JCVariableDecl tree) {
         try {
             if (docComments != null && docComments.get(tree) != null) {

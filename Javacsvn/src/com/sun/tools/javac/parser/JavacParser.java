@@ -1117,7 +1117,7 @@ public class JavacParser implements Parser {
                     mode = EXPR;
                     //JCExpression t1 = term();
                     t = indexListArray(t);/*to(F.at(pos1).Indexed(t, t1));*/
-                }
+                }else
                 accept(RBRACKET);
             } else if (S.token() == DOT) {
                 S.nextToken();
@@ -1538,21 +1538,40 @@ public class JavacParser implements Parser {
      	accept(LBRACKET);
 
         ListBuffer<JCExpression> elems = new ListBuffer<JCExpression>();
-        if (S.token() == COMMA) {
-            S.nextToken();
-        } else if (S.token() != RBRACKET) {
-            elems.append(parseExpression());
-            while (S.token() == COMMA) {
-                S.nextToken();
-                if (S.token() == RBRACKET) break;
-                elems.append(parseExpression());
-            }
+        
+        if (S.token() != RBRACKET) {
+        	JCExpression expr=parseExpression();
+            if(S.token()==FOR){
+            	//List comprehension
+            	accept(FOR);
+            	accept(LPAREN); 
+            	JCExpression type = parseType();
+            	JCVariableDecl decl=F.VarDef(optFinal(0), ident(),type, null);
+            	accept(COLON);
+            	JCExpression listExpr=parseExpression();
+            	accept(RPAREN);
+            	JCExpression ifExpr=null;
+            	if(S.token()==IF)
+            	{
+            		accept(IF);
+            		ifExpr=parseExpression();
+            	}
+            	accept(RBRACKET);
+            	
+            	return toP(F.at(newpos).ListComp(expr, decl, listExpr, ifExpr));
+            }else
+            	elems.append(expr);
+	            while (S.token() == COMMA) {
+	                S.nextToken();
+	                if (S.token() == RBRACKET) break;
+	                elems.append(parseExpression());
+	            }
         }
         accept(RBRACKET);
         return toP(F.at(newpos).NewList(t, elems.toList()));
     }
     
-    /** ParExpression = "(" BlockExpression ")"
+    /** ParExpression = "(" Expression ")"
      */
     JCExpression parExpression() {
         accept(LPAREN);
@@ -3039,8 +3058,49 @@ public class JavacParser implements Parser {
             allowTWR = true;
         }
     }
+    
     /**
-     * call parser to parse a block of code
+     *get block code of __list_access from name of them. 
+     */
+    public String getListAccessCode(String list, String beg,String end,String step)
+    {
+    	String code_list_access
+    	="{"
+		+ "		int len = "+list+".size();                                           	"
+		+ "		java.util.List tmpList = new java.util.ArrayList();              	"
+		+ "                                                                         "
+		+ "		if ("+step+" == Integer.MAX_VALUE)                                   	"
+		+ "			"+step+" = 1;                                                    	"
+		+ "		if ("+step+" > 0) {                                                  	"
+		+ "			"+beg+" += ("+beg+" < 0) ? len : 0;                                  	"
+		+ "			"+end+" += ("+end+" < 0) ? len : 0;                                     "
+		+ "                                                                      	"
+		+ "			if ("+beg+" == Integer.MAX_VALUE)                                	"
+		+ "				"+beg+" = 0;                                                 	"
+		+ "			if ("+end+" == Integer.MAX_VALUE)                                	"
+		+ "				"+end+" = len;                                               	"
+		+ "			for (int i = "+beg+"; i < "+end+"; i += "+step+") {                      	"
+		+ "				tmpList.add("+list+".get(i));                                	"
+		+ "			}                                                            	"
+		+ "		} else {                                                         	"
+		+ "			"+beg+" += ("+beg+" < 0) ? len : 0;                                  	"
+		+ "			"+end+" += ("+end+" < 0) ? len : 0;                                  	"
+		+ "                                                                      	"
+		+ "			if ("+beg+" == Integer.MAX_VALUE)                                	"
+		+ "				"+beg+" = len - 1;                                           	"
+		+ "			if ("+end+" == Integer.MAX_VALUE)                                	"
+		+ "				"+end+" = -1;                                                	"
+		+ "                                                                         "
+		+ "			for (int i = "+beg+"; i > "+end+"; i += "+step+") {                         "
+		+ "				tmpList.add("+list+".get(i));                                   "
+		+ "			}                                                               "
+		+ "		}                                                                   "
+		+ "		return tmpList;                                                     "
+		+ "	} end ";
+    	return code_list_access;
+    }
+    /**
+     * call parser to parse a method of code
      * @param code
      * @return
      */
@@ -3056,7 +3116,32 @@ public class JavacParser implements Parser {
 		List<JCTree> trees= classOrInterfaceBodyDeclaration(null,false);
 		return trees.get(0);
 	}
-    public List<JCTree> parseMethods()
+    /**
+     * call parser to parse a block of code
+     * @return JCBlock
+     */
+    public JCBlock parseBlock(String code)
+    {
+    	PrivateAccessField.setField(S, "buf", code.toCharArray());
+		//S.bp=-1
+		PrivateAccessField.setFieldInt(S, "bp", -1);
+		//S.ch=' '
+		PrivateAccessField.setFieldChar(S, "ch", ' ');
+		S.nextToken();
+		JCBlock block=block();
+		return block;
+    }
+    /**
+     * parse a block expression
+     * */
+    public JCBlockExp parseBlockExp(String code)
+    {
+    	JCBlock block=parseBlock(code);
+    	JCBlockExp blockExp=F.BlockExp(block);
+    	return blockExp;
+    }
+    
+    public List<JCTree> parseMethods_bk()
     {
     	String code_list_access
 		= "private static java.util.List __list_access(java.util.List list, int beg,"  

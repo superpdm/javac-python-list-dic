@@ -209,6 +209,12 @@ public class TreeScanner extends Visitor {
         scan(tree.args);
         scan(tree.def);
     }
+    public void visitListComp(JCListComp tree) {
+        scan(tree.expr);
+        scan(tree.ifExpr);
+        scan(tree.decl);
+        scan(tree.listExpr);
+    }
 
     public void visitNewArray(JCNewArray tree) {
         scan(tree.elemtype);

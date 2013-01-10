@@ -281,6 +281,13 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
         r = scanAndReduce(node.getClassBody(), p, r);
         return r;
     }
+    public R visitListComp(ListCompTree node, P p) {
+        R r = scan(node.getExpr(), p);
+        r = scanAndReduce(node.getDcl(), p, r);
+        r = scanAndReduce(node.getExprIf(), p, r);
+        r = scanAndReduce(node.getListExpr(), p, r);
+        return r;
+    }
 
     public R visitNewArray(NewArrayTree node, P p) {
         R r = scan(node.getType(), p);

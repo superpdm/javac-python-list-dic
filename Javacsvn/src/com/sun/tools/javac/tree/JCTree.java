@@ -1466,15 +1466,25 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
     }
 
-    public static class JCListComp extends JCExpression implements ListComp {
-    	
-        public JCListComp(){
-			
+    public static class JCListComp extends JCExpression implements ListCompTree {
+    	public JCExpression expr;
+    	public JCVariableDecl decl;
+    	public JCExpression listExpr;
+    	public JCExpression ifExpr;
+        
+        public JCListComp(JCExpression expr, JCVariableDecl decl,
+				JCExpression listExpr, JCExpression ifExpr) {
+			super();
+			this.expr = expr;
+			this.decl = decl;
+			this.listExpr = listExpr;
+			this.ifExpr = ifExpr;
 		}
-        @Override
+
+		@Override
         public void accept(Visitor v) { v.visitListComp(this); }
 
-        public Kind getKind() { return Kind.CLASS; }
+        public Kind getKind() { return Kind.LIST_COMP; }
         
        
         @Override
@@ -1488,8 +1498,31 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 		}
 		@Override
 		public Tree getType() {
-			// TODO Auto-generated method stub
 			return null;
+		}
+
+		@Override
+		public Tree getExpr() {
+			// TODO Auto-generated method stub
+			return expr;
+		}
+
+		@Override
+		public Tree getDcl() {
+			// TODO Auto-generated method stub
+			return decl;
+		}
+
+		@Override
+		public Tree getExprIf() {
+			// TODO Auto-generated method stub
+			return ifExpr;
+		}
+
+		@Override
+		public Tree getListExpr() {
+			// TODO Auto-generated method stub
+			return listExpr;
 		}
     }
     
@@ -1505,7 +1538,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         @Override
         public void accept(Visitor v) { v.visitNewList(this); }
 
-        public Kind getKind() { return Kind.NEW_ARRAY; }
+        public Kind getKind() { return Kind.NEW_LIST; }
         public JCExpression getType() { return elemtype; }
         public List<JCExpression> getInitializers() {
             return elems;
@@ -1744,7 +1777,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         @Override
         public void accept(Visitor v) { v.visitIndexedL(this); }
 
-        public Kind getKind() { return Kind.ARRAY_ACCESS; }
+        public Kind getKind() { return Kind.LIST_ACCESS; }
         public JCExpression getExpression() { return indexed; }
         public JCExpression getTerm1() { return term1; }
         public JCExpression getTerm2() { return term2; }

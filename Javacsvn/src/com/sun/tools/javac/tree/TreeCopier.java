@@ -291,7 +291,14 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         JCClassDecl def = copy(t.def, p);
         return M.at(t.pos).NewClass(encl, typeargs, clazz, args, def);
     }
-
+    public JCTree visitListComp(ListCompTree node, P p) {
+        JCListComp t = (JCListComp) node;
+        JCExpression expr = copy(t.expr, p);
+        JCExpression listExpr = copy(t.listExpr, p);
+        JCExpression ifExpr = copy(t.ifExpr, p);
+        JCVariableDecl decl = copy(t.decl, p);
+        return M.at(t.pos).ListComp(expr, decl, listExpr, ifExpr);
+    }
     public JCTree visitParenthesized(ParenthesizedTree node, P p) {
         JCParens t = (JCParens) node;
         JCExpression expr = copy(t.expr, p);

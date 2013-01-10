@@ -1,31 +1,26 @@
 package com.sun.tools.javac.tree;
 
-import java.util.Vector;
-
-import com.sun.org.apache.xpath.internal.Expression;
-import com.sun.tools.classfile.Opcode;
-import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.code.Types;
-import com.sun.tools.javac.code.Symbol.MethodSymbol;
-import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.comp.MemberEnter;
+import com.sun.tools.javac.parser.JavacParser;
+import com.sun.tools.javac.parser.ParserFactory;
 import com.sun.tools.javac.tree.JCTree.JCArrayAccess;
 import com.sun.tools.javac.tree.JCTree.JCAssign;
 import com.sun.tools.javac.tree.JCTree.JCBinary;
+import com.sun.tools.javac.tree.JCTree.JCBlockExp;
 import com.sun.tools.javac.tree.JCTree.JCConditional;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCFieldAccess;
 import com.sun.tools.javac.tree.JCTree.JCIdent;
 import com.sun.tools.javac.tree.JCTree.JCListAccess;
+import com.sun.tools.javac.tree.JCTree.JCListComp;
 import com.sun.tools.javac.tree.JCTree.JCLiteral;
 import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import com.sun.tools.javac.tree.JCTree.JCMethodInvocation;
 import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.JCTree.JCNewList;
-import com.sun.tools.javac.tree.JCTree.JCParens;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
@@ -34,21 +29,16 @@ import com.sun.tools.javac.util.Names;
 
 public class ListTreeTranslator extends TreeTranslator {
 	private final Names names;
-	private final Context context;
 	private final TreeMaker treeMaker;
-	private final Attr attr;
-	private final MemberEnter memberEnter;
 	private final Log log;
 	private boolean isLeft = false;
 	private boolean isSet = false;
-	private MethodSymbol methodSymbol=null;
+	private final MyBlocks myBlocks;
 	public ListTreeTranslator(Context context) {
-		this.context = context;
 		names = Names.instance(context);
 		treeMaker = TreeMaker.instance(context);
-		attr = Attr.instance(context);
 		log = Log.instance(context);
-		memberEnter=MemberEnter.instance(context);
+		myBlocks=new MyBlocks(context);
 	}
 
 	
@@ -137,16 +127,20 @@ public class ListTreeTranslator extends TreeTranslator {
 		tree.term1 = translate(tree.term1);
 		tree.term2 = translate(tree.term2);
 		tree.term3 = translate(tree.term3);
+		
+		result=myBlocks.getListAccessBlock(tree);
 		// __list_access();
-		List<JCExpression> args = List.of(tree.indexed, tree.term1, tree.term2,
-				tree.term3);
-		JCIdent list_access = treeMaker
-				.Ident(names.fromString("__list_access"));
+		
+//		List<JCExpression> args = List.of(tree.indexed, tree.term1, tree.term2,
+//				tree.term3);
+//		
+//		JCIdent list_access = treeMaker
+//				.Ident(names.fromString("__list_access"));
+//
+//		JCMethodInvocation list_access_meth = treeMaker.Apply(null,
+//				list_access, args);
 
-		JCMethodInvocation list_access_meth = treeMaker.Apply(null,
-				list_access, args);
-
-		result = list_access_meth;
+//		result = list_access_meth;
 	}
 
 	@Override
@@ -185,10 +179,12 @@ public class ListTreeTranslator extends TreeTranslator {
 		tree.lhs = translate(tree.lhs);
 		tree.rhs = translate(tree.rhs);
 
+		try{
 		Name lTypeName = tree.lhs.type.tsym.flatName();
 		Name rTypeName = tree.rhs.type.tsym.flatName();
 		Name listName = names.fromString("java.util.List");
 		Name intName = names.fromString("java.lang.Integer");
+		
 		if (lTypeName.equals(listName) || rTypeName.equals(listName)) {
 			if (lTypeName.equals(listName) && rTypeName.equals(listName)) { // list
 				// op
@@ -225,13 +221,21 @@ public class ListTreeTranslator extends TreeTranslator {
 		} else {
 			result = tree;
 		}
-
+		}
+		catch (Exception e) {
+			result=tree;
+		}
 	}
 
 
-	@Override
-	public void visitMethodDef(JCMethodDecl tree) {
-		// TODO Auto-generated method stub
-		super.visitMethodDef(tree);
+	public void visitListComp(JCListComp tree)
+	{
+		tree.decl=translate(tree.decl);
+		tree.expr=translate(tree.expr);
+		tree.ifExpr=translate(tree.ifExpr);
+		tree.listExpr=translate(tree.listExpr);
+		
+		result = myBlocks.getListCompBlock(tree);
+		
 	}
 }

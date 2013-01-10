@@ -171,6 +171,9 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
     public R visitNewClass(NewClassTree node, P p) {
         return defaultAction(node, p);
     }
+    public R visitListComp(ListCompTree node,P p){
+    	return defaultAction(node, p);
+    }
 
     public R visitNewArray(NewArrayTree node, P p) {
         return defaultAction(node, p);
