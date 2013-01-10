@@ -1205,17 +1205,22 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 //are correctly initialized (e.g. they have a type/symbol)
                 attr.postAttr(env);
             }
-            compileStates.put(env, CompileState.ATTR);
-            JCTree tree=env.toplevel;
-            env.toplevel.accept(new ListTreeTranslator(context));
             
-            env.enclClass.sym.flags_field|=UNATTRIBUTED;
-            attr.attrib(env);
-
+            if(!shouldStop(CompileState.ATTR))
+            {
+	            JCTree tree=env.toplevel;
+	            env.toplevel.accept(new ListTreeTranslator(context));
+	            env.enclClass.sym.flags_field|=UNATTRIBUTED;
+	            attr.attrib(env);
+	
+	             compileStates.put(env, CompileState.ATTR);
+            }
+            
         }
         finally {
             log.useSource(prev);
         }
+        
 
         return env;
     }

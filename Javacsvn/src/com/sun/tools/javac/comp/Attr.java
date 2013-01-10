@@ -1591,9 +1591,39 @@ public class Attr extends JCTree.Visitor {
         }
 
     public void visitListComp(JCListComp tree) {
-    	//Type owntype = types.createErrorType(tree.type);
-        //Type vatType=attribType(tree.decl.vartype, env);
-        /*unfinished!*/
+	    	Type owntype = types.createErrorType(tree.type);
+	    	Env<AttrContext> localEnv =
+                env.dup(tree, env.info.dup(env.info.scope.dup()));
+	    	
+	    	Type varType=attribStat(tree.decl, localEnv);
+	    	Type eleType=attribExpr(tree.expr, localEnv);
+	    	Type listExprType = types.upperBound(attribExpr(tree.listExpr, localEnv));
+	        chk.checkNonVoid(tree.pos(), listExprType);
+	        Type elemtype = types.elemtype(listExprType); // perhaps expr is an array?
+	        if (elemtype == null) {
+	            // or perhaps expr implements Iterable<T>?
+	            Type base = types.asSuper(listExprType, syms.iterableType.tsym);
+	            if (base == null) {
+	                log.error(tree.expr.pos(),
+	                        "foreach.not.applicable.to.type",
+	                        listExprType,
+	                        diags.fragment("type.req.array.or.iterable"));
+	                elemtype = types.createErrorType(listExprType);
+	            } else {
+	                List<Type> iterableParams = base.allparams();
+	                elemtype = iterableParams.isEmpty()
+	                    ? syms.objectType
+	                    : types.upperBound(iterableParams.head);
+	            }
+	        }
+	        chk.checkType(tree.listExpr.pos(), elemtype, tree.decl.sym.type);
+	        
+	        if(tree.ifExpr!=null)
+	        	attribExpr(tree.ifExpr, localEnv,syms.booleanType);
+	    	if(pt.getTypeArguments().head!=null)
+	    		chk.checkType(tree.expr.pos(), eleType, pt.getTypeArguments().head);
+	    	localEnv.info.scope.leave();
+	    	result=pt;
 
 	}
     public void visitNewClass(JCNewClass tree) {
@@ -1992,20 +2022,16 @@ public class Attr extends JCTree.Visitor {
     public void visitNewList(JCNewList tree) {
         Type owntype = types.createErrorType(tree.type);
         Type elemtype;
-        if (tree.elemtype != null) {
-            elemtype = attribType(tree.elemtype, env);
-            chk.validate(tree.elemtype, env);
-            owntype = elemtype;
-            
-        } else {
-            elemtype=owntype;
-        }
+ 
+        if(pt.getTypeArguments().head!=null)
+        	elemtype=pt.getTypeArguments().head;
+        else
+        	elemtype=owntype;
+        
         if (tree.elems != null) {
             attribExprs(tree.elems, env, elemtype);
-            //owntype = new ArrayType(elemtype, syms.arrayClass);
         }
-        if (!types.isReifiable(elemtype))
-            log.error(tree.pos(), "generic.array.creation");
+        
         result = check(tree, owntype, VAL, pkind, pt);
     }
     public void visitParens(JCParens tree) {
