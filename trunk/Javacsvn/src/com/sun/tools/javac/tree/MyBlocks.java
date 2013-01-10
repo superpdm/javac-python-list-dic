@@ -86,12 +86,18 @@ public class MyBlocks {
     	String decl=tree.decl.toString();
     	String expr=tree.expr.toString();
     	String listExpr=tree.listExpr.toString();
-    	String ifExpr=tree.ifExpr.toString();
+    	String ifExpr="";
+    	if(tree.ifExpr!=null)
+    		ifExpr=tree.ifExpr.toString();
+    	
     	String code="{"
     		+"java.util.List tmpList = new ArrayList();"
-    		+"for("+decl+":"+listExpr+")"
-    		+"	if("+ifExpr+")"
-    		+"		tmpList.add("+expr+");"	
+    		+"for("+decl+":"+listExpr+")";
+    	if(ifExpr!="")
+    		code+=
+    			"	if("+ifExpr+")";
+    	code+=
+    		"		tmpList.add("+expr+");"	
     		+"tmpList=tmpList;"
     		+"} end";
     	return code;
