@@ -1,5 +1,6 @@
 package com.sun.tools.javac.tree;
 
+import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Env;
@@ -31,6 +32,7 @@ public class ListTreeTranslator extends TreeTranslator {
 	private final Names names;
 	private final TreeMaker treeMaker;
 	private final Log log;
+	final Symtab syms;
 	private boolean isLeft = false;
 	private boolean isSet = false;
 	private final MyBlocks myBlocks;
@@ -39,6 +41,7 @@ public class ListTreeTranslator extends TreeTranslator {
 		treeMaker = TreeMaker.instance(context);
 		log = Log.instance(context);
 		myBlocks=new MyBlocks(context);
+		syms= Symtab.instance(context);
 	}
 
 	
@@ -182,8 +185,8 @@ public class ListTreeTranslator extends TreeTranslator {
 		try{
 		Name lTypeName = tree.lhs.type.tsym.flatName();
 		Name rTypeName = tree.rhs.type.tsym.flatName();
-		Name listName = names.fromString("java.util.List");
-		Name intName = names.fromString("java.lang.Integer");
+		Name listName = syms.listType.tsym.flatName();
+		Name intName = syms.intType.tsym.flatName();
 		
 		if (lTypeName.equals(listName) || rTypeName.equals(listName)) {
 			if (lTypeName.equals(listName) && rTypeName.equals(listName)) { // list
@@ -191,33 +194,12 @@ public class ListTreeTranslator extends TreeTranslator {
 				// list
 
 				if (tree.getOpcode() == JCTree.PLUS) {
-					JCIdent meth = treeMaker.Ident(names
-							.fromString("__list_add"));
-					List<JCExpression> args = List.of(tree.lhs, tree.rhs);
-					JCMethodInvocation list_add_invoc = treeMaker.Apply(null,
-							meth, args);
-					result = list_add_invoc;
+
+					result = myBlocks.getListAddBlock(tree);
 				}
 
-			} else if (lTypeName.equals(intName) && rTypeName.equals(listName)) {
-				// int op list
-				JCIdent meth = treeMaker.Ident(names.fromString("__list_mul"));
-				List<JCExpression> args = List.of(tree.rhs, tree.lhs);
-				JCMethodInvocation list_mul_invoc = treeMaker.Apply(null, meth,
-						args);
-				result = list_mul_invoc;
-
-			} else if (lTypeName.equals(listName) && rTypeName.equals(intName)) {
-				// list op int
-				JCIdent meth = treeMaker.Ident(names.fromString("__list_mul"));
-				List<JCExpression> args = List.of(tree.lhs, tree.rhs);
-				JCMethodInvocation list_mul_invoc = treeMaker.Apply(null, meth,
-						args);
-				result = list_mul_invoc;
-			} else {
-				// list op other type
-				log.error(tree.pos(), "illegal.start.of.expr");
-			}
+			} else 
+				result=myBlocks.getListMulBlock(tree);
 		} else {
 			result = tree;
 		}

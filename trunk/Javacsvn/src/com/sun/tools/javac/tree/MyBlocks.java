@@ -1,7 +1,9 @@
 package com.sun.tools.javac.tree;
 
+import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.parser.JavacParser;
 import com.sun.tools.javac.parser.ParserFactory;
+import com.sun.tools.javac.tree.JCTree.JCBinary;
 import com.sun.tools.javac.tree.JCTree.JCBlock;
 import com.sun.tools.javac.tree.JCTree.JCBlockExp;
 import com.sun.tools.javac.tree.JCTree.JCListAccess;
@@ -12,10 +14,12 @@ public class MyBlocks {
 	
 	private final  ParserFactory parserFactory;
 	private final  TreeMaker treeMaker;
+	private final Symtab syms;
 	public MyBlocks(Context context)
 	{
 		parserFactory=ParserFactory.instance(context);
 		treeMaker=TreeMaker.instance(context);
+		syms=Symtab.instance(context);
 	}
 	/**
      *get block code of __list_access from name of them. 
@@ -109,4 +113,46 @@ public class MyBlocks {
     	return blockExp;
     }
 
+    private String getListAddCode(JCBinary tree)
+    {
+    	String code="{"
+    		+"java.util.List __tmp=new ArrayList("+tree.lhs.toString()+");"
+    		+"__tmp.addAll("+tree.rhs.toString()+");"
+    		+"__tmp=__tmp;"
+    		+"} end";
+    	return code;
+    }
+    
+    public JCBlockExp getListAddBlock(JCBinary tree)
+    {
+    	String code=getListAddCode(tree);
+    	JCBlockExp blockExp=parseBlockExp(code);
+    	return blockExp;
+    }
+    private String getListMulCode(JCBinary tree)
+    {
+    	JCTree listTree,intTree;
+    	if(tree.lhs.type.tsym==syms.listType.tsym){
+    		listTree=tree.lhs;
+    		intTree=tree.rhs;
+    	}else
+    	{
+    		listTree=tree.rhs;
+    		intTree=tree.lhs;
+    	}
+    	String code="{"
+    		+"java.util.List __list="+listTree.toString()+";"
+    		+"java.util.List __tmp=new ArrayList(__list);"
+    		+"for(int i=0;i<"+intTree.toString()+"-1;i++)"
+    		+"   __tmp.addAll(__list);"
+    		+"__tmp=__tmp;"
+    		+"} end";
+    	return code;
+    }
+    public JCBlockExp getListMulBlock(JCBinary tree)
+    {
+    	String code=getListMulCode(tree);
+    	JCBlockExp blockExp=parseBlockExp(code);
+    	return blockExp;
+    }
 }
