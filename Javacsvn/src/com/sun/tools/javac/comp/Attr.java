@@ -2117,12 +2117,22 @@ public class Attr extends JCTree.Visitor {
         Type left = chk.checkNonVoid(tree.lhs.pos(), attribExpr(tree.lhs, env));
         Type right = chk.checkNonVoid(tree.lhs.pos(), attribExpr(tree.rhs, env));
 
-        // Find operator.
-        Symbol operator = tree.operator =
-            rs.resolveBinaryOperator(tree.pos(), tree.getTag(), env, left, right);
+        Symbol operator=null;
+        if(tree.getTag()==JCTree.PLUS && left.tsym==right.tsym && left.tsym==syms.listType.tsym ){
+        		
+        }else if(tree.getTag()==JCTree.MUL && left.tsym==syms.listType.tsym && right.tsym==syms.intType.tsym)
+        {
+        	
+        }else if(tree.getTag()==JCTree.MUL && left.tsym==syms.intType.tsym && right.tsym==syms.listType.tsym)
+        {
+        	
+        }else
+        	operator = tree.operator =
+        		rs.resolveBinaryOperator(tree.pos(), tree.getTag(), env, left, right);
 
         Type owntype = types.createErrorType(tree.type);
-        if (operator.kind == MTH &&
+        if (operator!=null && 
+        		operator.kind == MTH &&
                 !left.isErroneous() &&
                 !right.isErroneous()) {
             owntype = operator.type.getReturnType();

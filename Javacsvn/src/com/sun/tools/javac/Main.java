@@ -46,7 +46,7 @@ public class Main {
     /** Unsupported command line interface.
      * @param args   The command line parameters.
      */
-    public static void main(String[] args_old) throws Exception {
+    public static void main(String[] args_bk) throws Exception {
     	String args[]={"C:\\kk.java"};
       if (args.length > 0 && args[0].equals("-Xjdb")) {
         String[] newargs = new String[args.length + 2];
